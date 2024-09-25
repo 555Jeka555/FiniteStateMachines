@@ -72,22 +72,17 @@ def readMilyFromCsv(fileName, delimiter=';'):
         return inputValues, mureStates, millyInputValue
 
 
-def writeMureToCsv(fileName, data, delimiter=';'):
+def writeToCsv(fileName, data, delimiter=';'):
     with open(fileName, 'w', newline='', encoding='ISO-8859-1') as file:
         writer = csv.writer(file, delimiter=delimiter)
         writer.writerows(data)
 
-
-if __name__ == '__main__':
-
-    inputValues, mureStates, millyInputValue = readMilyFromCsv("data/read/Milly1.csv")
-
-    data = []
-
+def convertMillyToMure(inputValues, mureStates, millyInputValue):
     print("inputValues: ", inputValues)
     print("mureStates: ", mureStates)
     print("millyInputValue: ", millyInputValue)
 
+    data = []
     width = len(mureStates.values()) + 1
     height = len(inputValues) + 2
 
@@ -109,13 +104,23 @@ if __name__ == '__main__':
 
             statesToNewState = millyInputValue[inputValue]
             for state, newStateFromMilly in statesToNewState.items():
-                if state in stateWithOutValue:
+                if state in stateWithOutValue:  # TODO исправить проверку на нормаьную, а не на вхождение
                     data[j + 2][i + 1] = newStateFromMilly
 
             j += 1
         i += 1
 
+    return data
+
+
+if __name__ == '__main__':
+    fileName = "data/read/Milly2.csv"
+
+    inputValues, mureStates, millyInputValue = readMilyFromCsv(fileName)
+
+    data = convertMillyToMure(inputValues, mureStates, millyInputValue)
+
     for row in data:
         print(row)
 
-    writeMureToCsv("data/write/Milly1.csv", data)
+    writeToCsv(fileName, data)
