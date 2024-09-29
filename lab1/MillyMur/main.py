@@ -3,6 +3,12 @@ import csv
 NEW_STATE_NAME = 'q'
 
 
+def printFormattedDict(data):
+    for row in data:
+        formattedRow = " ".join(f"{item:<10}" for item in row)
+        print(formattedRow)
+    print()
+
 def readMilyFromCsv(fileName, delimiter=';'):
     with open(fileName, 'r', encoding='ISO-8859-1') as file:
         reader = csv.reader(file, delimiter=delimiter)
@@ -17,9 +23,7 @@ def readMilyFromCsv(fileName, delimiter=';'):
         for row in reader:
             data.append(row)
 
-        for row in data:
-            print(row)
-        print()
+        printFormattedDict(data)
 
         i = 0
         for row in data:
@@ -104,7 +108,8 @@ def convertMillyToMure(inputValues, mureStates, millyInputValue):
 
             statesToNewState = millyInputValue[inputValue]
             for state, newStateFromMilly in statesToNewState.items():
-                if state in stateWithOutValue:  # TODO исправить проверку на нормаьную, а не на вхождение
+                stateFromMure = stateWithOutValue.split('/')[0]
+                if state == stateFromMure:
                     data[j + 2][i + 1] = newStateFromMilly
 
             j += 1
@@ -114,13 +119,13 @@ def convertMillyToMure(inputValues, mureStates, millyInputValue):
 
 
 if __name__ == '__main__':
-    fileName = "data/read/Milly2.csv"
+    fileNameRead = "data/read/Milly1.csv"
+    fileNameWrite = "data/write/Milly1.csv"
 
-    inputValues, mureStates, millyInputValue = readMilyFromCsv(fileName)
+    inputValues, mureStates, millyInputValue = readMilyFromCsv(fileNameRead)
 
     data = convertMillyToMure(inputValues, mureStates, millyInputValue)
 
-    for row in data:
-        print(row)
+    printFormattedDict(data)
 
-    writeToCsv(fileName, data)
+    writeToCsv(fileNameWrite, data)
