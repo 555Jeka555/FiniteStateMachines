@@ -1,6 +1,9 @@
 import csv
+import argparse
 
 NEW_STATE_NAME = 'q'
+CONVERT_TYPE_MEALY_TO_MOORE = 'mealy-to-moore'
+CONVERT_TYPE_MOORE_TO_MEALY = 'moore-to-mealy'
 
 
 def printFormattedDict(data):
@@ -10,7 +13,7 @@ def printFormattedDict(data):
     print()
 
 
-def readMilyFromCsv(fileName, delimiter=';'):
+def readMealyFromCsv(fileName, delimiter=';'):
     with open(fileName, 'r', encoding='ISO-8859-1') as file:
         reader = csv.reader(file, delimiter=delimiter)
         data = []
@@ -19,7 +22,7 @@ def readMilyFromCsv(fileName, delimiter=';'):
         newStates = []
         inputValues = []
         newStateCount = 0
-        mureStates = {}
+        mooreStates = {}
 
         for row in reader:
             data.append(row)
@@ -39,13 +42,13 @@ def readMilyFromCsv(fileName, delimiter=';'):
                     newStateCount += 1
 
                     newStateAlreadyExist = False
-                    for key in mureStates.keys():
+                    for key in mooreStates.keys():
                         if key == cell:
                             newStateAlreadyExist = True
                     if newStateAlreadyExist:
                         continue
 
-                    mureStates[cell] = newStateName
+                    mooreStates[cell] = newStateName
                     newStates.append(newStateName)
                 j += 1
             i += 1
@@ -68,13 +71,13 @@ def readMilyFromCsv(fileName, delimiter=';'):
                     if currentInputValue not in millyInputValue:
                         millyInputValue[currentInputValue] = {}
 
-                    millyInputValue[currentInputValue][currentState] = mureStates[cell]
+                    millyInputValue[currentInputValue][currentState] = mooreStates[cell]
 
                 j += 1
 
             i += 1
 
-        return inputValues, mureStates, millyStates, millyInputValue
+        return inputValues, mooreStates, millyStates, millyInputValue
 
 
 def writeToCsv(fileName, data, delimiter=';'):
@@ -83,11 +86,11 @@ def writeToCsv(fileName, data, delimiter=';'):
         writer.writerows(data)
 
 
-def convertMillyToMure(inputValues, mureStates, millyStates, millyInputValue):
+def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
     data = []
-    width = len(mureStates.values()) + len(millyStates) + 1
+    width = len(mooreStates.values()) + len(millyStates) + 1
     height = len(inputValues) + 2
-    remindMillyStates = millyStates.copy()
+    remindMealyStates = millyStates.copy()
 
     for _ in range(height):
         tmp = []
@@ -96,7 +99,7 @@ def convertMillyToMure(inputValues, mureStates, millyStates, millyInputValue):
         data.append(tmp)
 
     i = 0
-    for stateWithOutValue, newState in mureStates.items():
+    for stateWithOutValue, newState in mooreStates.items():
         data[0][i + 1] = stateWithOutValue
         data[1][i + 1] = newState
 
@@ -105,22 +108,22 @@ def convertMillyToMure(inputValues, mureStates, millyStates, millyInputValue):
             data[j + 2][0] = inputValue
 
             statesToNewState = millyInputValue[inputValue]
-            for state, newStateFromMilly in statesToNewState.items():
+            for state, newStateFromMealy in statesToNewState.items():
                 millyState = stateWithOutValue.split('/')[0]
                 if state == millyState:
 
-                    if state in remindMillyStates:
-                        remindMillyStates.remove(state)
+                    if state in remindMealyStates:
+                        remindMealyStates.remove(state)
 
-                    data[j + 2][i + 1] = newStateFromMilly
+                    data[j + 2][i + 1] = newStateFromMealy
 
             j += 1
         i += 1
 
     # i - сохранился с прошлого цикла, чтобы продолжить записывать дальше
     newStateCount = -1
-    for remindMillyState in remindMillyStates:
-        data[0][i + 1] = remindMillyState
+    for remindMealyState in remindMealyStates:
+        data[0][i + 1] = remindMealyState
 
         newStateNameRemind = NEW_STATE_NAME + str(newStateCount)
         newStateCount -= 1
@@ -132,13 +135,13 @@ def convertMillyToMure(inputValues, mureStates, millyStates, millyInputValue):
             data[j + 2][0] = inputValue
 
             statesToNewState = millyInputValue[inputValue]
-            for state, newStateFromMilly in statesToNewState.items():
-                if state != remindMillyState:
+            for state, newStateFromMealy in statesToNewState.items():
+                if state != remindMealyState:
                     continue
 
-                for stateWithOutValue, newState in mureStates.items():
-                    if newState == newStateFromMilly:
-                        data[j + 2][i + 1] = newStateFromMilly
+                for stateWithOutValue, newState in mooreStates.items():
+                    if newState == newStateFromMealy:
+                        data[j + 2][i + 1] = newStateFromMealy
 
             j += 1
         i += 1
@@ -147,13 +150,13 @@ def convertMillyToMure(inputValues, mureStates, millyStates, millyInputValue):
     return data
 
 
-def readMureFromCsv(fileName, delimiter=';'):
+def readMooreFromCsv(fileName, delimiter=';'):
     with open(fileName, 'r', encoding='ISO-8859-1') as file:
         reader = csv.reader(file, delimiter=delimiter)
         data = []
 
         inputValues = []
-        mureStates = {}
+        mooreStates = {}
 
         for row in reader:
             data.append(row)
@@ -169,12 +172,12 @@ def readMureFromCsv(fileName, delimiter=';'):
                     inputValues.append(cell)
                 elif i > 1 and j != 0:
                     millyStateWithOut = data[0][j]
-                    mureState = data[1][j]
+                    mooreState = data[1][j]
 
-                    if len(millyStateWithOut) == 0 and len(mureState) == 0:
+                    if len(millyStateWithOut) == 0 and len(mooreState) == 0:
                         continue
 
-                    mureStates[mureState] = millyStateWithOut
+                    mooreStates[mooreState] = millyStateWithOut
 
                 j += 1
             i += 1
@@ -199,7 +202,7 @@ def readMureFromCsv(fileName, delimiter=';'):
                     if currentState not in millyInputValues:
                         millyInputValues[currentState] = {}
 
-                    millyInputValues[currentState][currentInputValue] = mureStates[cell]
+                    millyInputValues[currentState][currentInputValue] = mooreStates[cell]
 
                 j += 1
 
@@ -208,7 +211,7 @@ def readMureFromCsv(fileName, delimiter=';'):
         return millyInputValues, inputValues
 
 
-def convertMureToMilly(millyInputValues, inputValues):
+def convertMooreToMealy(millyInputValues, inputValues):
     data = []
     width = len(millyInputValues.keys()) + 1
     height = len(inputValues) + 1
@@ -240,18 +243,22 @@ def convertMureToMilly(millyInputValues, inputValues):
 
 
 if __name__ == '__main__':
-    fileNameRead = "data/read/Milly2.csv"
-    fileNameWrite = "data/write/Milly2.csv"
+    parser = argparse.ArgumentParser(description='Process some CSV files.')
+    parser.add_argument('conertType', type=str, help='Input CSV file for Mealy')
+    parser.add_argument('inputFileName', type=str, help='Input CSV file')
+    parser.add_argument('outputFileName', type=str, help='Output CSV file')
 
-    # inputValues, mureStates, millyStates, millyInputValue = readMilyFromCsv(fileNameRead)
-    # data = convertMillyToMure(inputValues, mureStates, millyStates, millyInputValue)
-    # printFormattedDict(data)
-    # writeToCsv(fileNameWrite, data)
+    args = parser.parse_args()
 
-    fileNameRead = "data/read/Mure1.csv"
-    fileNameWrite = "data/write/Mure1.csv"
-
-    millyInputValues, inputValues = readMureFromCsv(fileNameRead)
-    data = convertMureToMilly(millyInputValues, inputValues)
-    printFormattedDict(data)
-    writeToCsv(fileNameWrite, data)
+    if args.conertType == CONVERT_TYPE_MEALY_TO_MOORE:
+        inputValues, mooreStates, millyStates, millyInputValue = readMealyFromCsv(args.inputFileName)
+        data = convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue)
+        printFormattedDict(data)
+        writeToCsv(args.outputFileName, data)
+    elif args.conertType == CONVERT_TYPE_MOORE_TO_MEALY:
+        millyInputValues, inputValues = readMooreFromCsv(args.inputFileName)
+        data = convertMooreToMealy(millyInputValues, inputValues)
+        printFormattedDict(data)
+        writeToCsv(args.outputFileName, data)
+    else:
+        print('Not found')
