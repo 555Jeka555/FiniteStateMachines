@@ -8,7 +8,7 @@ CONVERT_TYPE_MOORE_TO_MEALY = 'moore-to-mealy'
 
 def printFormattedDict(data):
     for row in data:
-        formattedRow = " ".join(f"{item:<10}" for item in row)
+        formattedRow = " ".join(f"{item:<6}" for item in row)
         print(formattedRow)
     print()
 
@@ -146,7 +146,6 @@ def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
             j += 1
         i += 1
 
-
     return data
 
 
@@ -154,63 +153,31 @@ def readMooreFromCsv(fileName, delimiter=';'):
     with open(fileName, 'r', encoding='ISO-8859-1') as file:
         reader = csv.reader(file, delimiter=delimiter)
         data = []
-
-        inputValues = []
-        mooreStates = {}
+        milly = []
 
         for row in reader:
             data.append(row)
+            tmp = []
+            for i in range(len(row)):
+                tmp.append('')
+            milly.append(tmp)
 
         printFormattedDict(data)
 
         i = 0
         for row in data:
-            j = 0
-
-            for cell in row:
-                if i > 1 and j == 0:
-                    inputValues.append(cell)
-                elif i > 1 and j != 0:
-                    millyStateWithOut = data[0][j]
-                    mooreState = data[1][j]
-
-                    if len(millyStateWithOut) == 0 and len(mooreState) == 0:
-                        continue
-
-                    mooreStates[mooreState] = millyStateWithOut
-
-                j += 1
-            i += 1
-
-        millyInputValues = {}
-        i = 0
-        for row in data:
-            if i <= 1:
-                i += 1
-                continue
-
-            currentInputValue = ''
-            j = 0
-            for cell in row:
-                if j == 0:
-                    currentInputValue = cell
-                elif j != 0:
-                    currentState = data[0][j].split('/')[0]
-                    if len(currentState) == 0:
-                        continue
-
-                    if currentState not in millyInputValues:
-                        millyInputValues[currentState] = {}
-
-                    millyInputValues[currentState][currentInputValue] = mooreStates[cell]
-
-                j += 1
+            for j in range(len(row)):
+                milly[i][j] = data[i][j]
+                if i > 1 and j != 0:
+                    milly[i][j] += '/' + data[0][j]
 
             i += 1
 
-        return millyInputValues, inputValues
+        milly.pop(0)
 
+        return milly
 
+# @deprecated
 def convertMooreToMealy(millyInputValues, inputValues):
     data = []
     width = len(millyInputValues.keys()) + 1
@@ -241,7 +208,6 @@ def convertMooreToMealy(millyInputValues, inputValues):
     return data
 
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some CSV files.')
     parser.add_argument('conertType', type=str, help='Input CSV file for Mealy')
@@ -256,9 +222,9 @@ if __name__ == '__main__':
         printFormattedDict(data)
         writeToCsv(args.outputFileName, data)
     elif args.conertType == CONVERT_TYPE_MOORE_TO_MEALY:
-        millyInputValues, inputValues = readMooreFromCsv(args.inputFileName)
-        data = convertMooreToMealy(millyInputValues, inputValues)
-        printFormattedDict(data)
-        writeToCsv(args.outputFileName, data)
+        milly = readMooreFromCsv(args.inputFileName)
+        # data = convertMooreToMealy(millyInputValues, inputValues)
+        printFormattedDict(milly)
+        writeToCsv(args.outputFileName, milly)
     else:
         print('Not found')
