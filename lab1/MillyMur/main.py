@@ -9,12 +9,13 @@ def printFormattedDict(data):
         print(formattedRow)
     print()
 
+
 def readMilyFromCsv(fileName, delimiter=';'):
     with open(fileName, 'r', encoding='ISO-8859-1') as file:
         reader = csv.reader(file, delimiter=delimiter)
         data = []
 
-        states = []
+        millyStates = []
         newStates = []
         inputValues = []
         newStateCount = 0
@@ -30,7 +31,7 @@ def readMilyFromCsv(fileName, delimiter=';'):
             j = 0
             for cell in row:
                 if i == 0 and j != 0:
-                    states.append(cell)
+                    millyStates.append(cell)
                 elif i != 0 and j == 0:
                     inputValues.append(cell)
                 elif i != 0 and j != 0:
@@ -62,7 +63,7 @@ def readMilyFromCsv(fileName, delimiter=';'):
                 if j == 0:
                     currentInputValue = cell
                 elif j != 0:
-                    currentState = states[j - 1]
+                    currentState = millyStates[j - 1]
 
                     if currentInputValue not in millyInputValue:
                         millyInputValue[currentInputValue] = {}
@@ -73,7 +74,7 @@ def readMilyFromCsv(fileName, delimiter=';'):
 
             i += 1
 
-        return inputValues, mureStates, millyInputValue
+        return inputValues, mureStates, millyStates, millyInputValue
 
 
 def writeToCsv(fileName, data, delimiter=';'):
@@ -81,14 +82,17 @@ def writeToCsv(fileName, data, delimiter=';'):
         writer = csv.writer(file, delimiter=delimiter)
         writer.writerows(data)
 
-def convertMillyToMure(inputValues, mureStates, millyInputValue):
+
+def convertMillyToMure(inputValues, mureStates, v, millyInputValue):
     print("inputValues: ", inputValues)
     print("mureStates: ", mureStates)
+    print("millyStates: ", millyStates)
     print("millyInputValue: ", millyInputValue)
 
     data = []
-    width = len(mureStates.values()) + 1
+    width = len(mureStates.values()) + len(millyStates) + 1
     height = len(inputValues) + 2
+    remindMillyStates = millyStates.copy()
 
     for _ in range(height):
         tmp = []
@@ -108,23 +112,54 @@ def convertMillyToMure(inputValues, mureStates, millyInputValue):
 
             statesToNewState = millyInputValue[inputValue]
             for state, newStateFromMilly in statesToNewState.items():
-                stateFromMure = stateWithOutValue.split('/')[0]
-                if state == stateFromMure:
+                millyState = stateWithOutValue.split('/')[0]
+                if state == millyState:
+
+                    if state in remindMillyStates:
+                        remindMillyStates.remove(state)
+
                     data[j + 2][i + 1] = newStateFromMilly
 
             j += 1
         i += 1
 
+    # i - сохранился с прошлого цикла, чтобы продолжить записывать дальше
+    newStateCount = -1
+    for remindMillyState in remindMillyStates:
+        data[0][i + 1] = remindMillyState
+
+        newStateNameRemind = NEW_STATE_NAME + str(newStateCount)
+        newStateCount -= 1
+
+        data[1][i + 1] = newStateNameRemind
+
+        j = 0
+        for inputValue in inputValues:
+            data[j + 2][0] = inputValue
+
+            statesToNewState = millyInputValue[inputValue]
+            for state, newStateFromMilly in statesToNewState.items():
+                if state != remindMillyState:
+                    continue
+
+                for stateWithOutValue, newState in mureStates.items():
+                    if newState == newStateFromMilly:
+                        data[j + 2][i + 1] = newStateFromMilly
+
+            j += 1
+        i += 1
+
+
     return data
 
 
 if __name__ == '__main__':
-    fileNameRead = "data/read/Milly1.csv"
-    fileNameWrite = "data/write/Milly1.csv"
+    fileNameRead = "data/read/Milly2.csv"
+    fileNameWrite = "data/write/Milly2.csv"
 
-    inputValues, mureStates, millyInputValue = readMilyFromCsv(fileNameRead)
+    inputValues, mureStates, millyStates, millyInputValue = readMilyFromCsv(fileNameRead)
 
-    data = convertMillyToMure(inputValues, mureStates, millyInputValue)
+    data = convertMillyToMure(inputValues, mureStates, millyStates, millyInputValue)
 
     printFormattedDict(data)
 
