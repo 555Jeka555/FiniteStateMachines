@@ -38,15 +38,15 @@ def readMealyFromCsv(fileName, delimiter=';'):
                 elif i != 0 and j == 0:
                     inputValues.append(cell)
                 elif i != 0 and j != 0:
-                    newStateName = NEW_STATE_NAME + str(newStateCount)
-                    newStateCount += 1
-
                     newStateAlreadyExist = False
                     for key in mooreStates.keys():
                         if key == cell:
                             newStateAlreadyExist = True
                     if newStateAlreadyExist:
                         continue
+
+                    newStateName = NEW_STATE_NAME + str(newStateCount)
+                    newStateCount += 1
 
                     mooreStates[cell] = newStateName
                     newStates.append(newStateName)
@@ -100,7 +100,7 @@ def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
 
     i = 0
     for stateWithOutValue, newState in mooreStates.items():
-        data[0][i + 1] = stateWithOutValue.split('/')[1]
+        data[0][i + 1] = stateWithOutValue.split('/')[1]  # Для проверки убрать .split('/')[1]
         data[1][i + 1] = newState
 
         j = 0
@@ -220,7 +220,6 @@ def convertMooreToMealy(millyInputValues, inputValues):
 
     return data
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some CSV files.')
     parser.add_argument('conertType', type=str, help='Input CSV file for Mealy')
@@ -234,6 +233,7 @@ if __name__ == '__main__':
         data = convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue)
         printFormattedDict(data)
         writeToCsv(args.outputFileName, data)
+
     elif args.conertType == CONVERT_TYPE_MOORE_TO_MEALY:
         data = readMooreFromCsv(args.inputFileName)
         printFormattedDict(data)
