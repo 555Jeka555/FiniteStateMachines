@@ -164,16 +164,27 @@ def readMooreFromCsv(fileName, delimiter=';'):
 
         printFormattedDict(data)
 
+        millyStates = []
+        millyStatesWithOut = {}
+
         i = 0
         for row in data:
             for j in range(len(row)):
-                milly[i][j] = data[i][j]
-                if i > 1 and j != 0:
-                    milly[i][j] += '/' + data[0][j]
+                if i == 1 and j != 0:
+                    millyState = data[i][j]
 
+                    if millyState not in millyStates:
+                        millyStates.append(millyState)
+                        milly[1][j] = millyState
+
+                    millyStatesWithOut[millyState] = data[0][j]
+                elif i > 1 and j == 0:
+                    milly[i][j] = data[i][j]
+                elif i > 1 and j > 0:
+                    millyState = data[i][j]
+
+                    milly[i][j] = millyState + '/' + millyStatesWithOut[millyState]
             i += 1
-
-        milly.pop(0)
 
         return milly
 
@@ -222,9 +233,8 @@ if __name__ == '__main__':
         printFormattedDict(data)
         writeToCsv(args.outputFileName, data)
     elif args.conertType == CONVERT_TYPE_MOORE_TO_MEALY:
-        milly = readMooreFromCsv(args.inputFileName)
-        # data = convertMooreToMealy(millyInputValues, inputValues)
-        printFormattedDict(milly)
-        writeToCsv(args.outputFileName, milly)
+        data = readMooreFromCsv(args.inputFileName)
+        printFormattedDict(data)
+        writeToCsv(args.outputFileName, data)
     else:
         print('Not found')
