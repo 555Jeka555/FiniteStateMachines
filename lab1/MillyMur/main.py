@@ -146,7 +146,21 @@ def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
             j += 1
         i += 1
 
-    return data
+    dataWithNotEmpties = []
+    i = 0
+    for row in data:
+        tmp = []
+        j = 0
+        for cell in row:
+            if len(cell) != 0 or (i <= 1 and j <= 1):
+                tmp.append(cell)
+            j += 1
+
+        dataWithNotEmpties.append(tmp)
+
+        i += 1
+
+    return dataWithNotEmpties
 
 
 def readMooreFromCsv(fileName, delimiter=';'):
@@ -185,6 +199,8 @@ def readMooreFromCsv(fileName, delimiter=';'):
 
                     milly[i][j] = millyState + '/' + millyStatesWithOut[millyState]
             i += 1
+
+        milly.pop(0)
 
         return milly
 
