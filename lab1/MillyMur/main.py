@@ -100,7 +100,7 @@ def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
 
     i = 0
     for stateWithOutValue, newState in mooreStates.items():
-        data[0][i + 1] = stateWithOutValue
+        data[0][i + 1] = stateWithOutValue.split('/')[1]
         data[1][i + 1] = newState
 
         j = 0
