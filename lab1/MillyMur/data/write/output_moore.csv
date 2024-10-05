@@ -1,4 +1,4 @@
-;q0;q1;q2;q3;q4;q5;q6;q7;q8;q9
-x1;q3/y1;q3/y1;q3/y1;q2/y5;q2/y5;q0/y2;q0/y2;q0/y2;q9/y3;q9/y3
-x2;q5/y1;q5/y1;q5/y1;q4/y2;q4/y2;q8/y1;q8/y1;q8/y1;q1/y4;q1/y4
-x3;q2/y5;q2/y5;q2/y5;q7/y5;q7/y5;q6/y4;q6/y4;q6/y4;q3/y1;q3/y1
+;S2/y2;S0/y1;S1/y2;S1/y1;S2/y3
+;q0;q1;q2;q3;q4
+x1;q2;q0;q1;q1;q2
+x2;q1;q3;q4;q4;q1
