@@ -129,10 +129,10 @@ def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
         i += 1
 
     # i - сохранился с прошлого цикла, чтобы продолжить записывать дальше
-    newStateCount = -1
+    newStateCount = len(mooreStates.values()) + 2
     for remindMealyState in remindMealyStates:
         newStateNameRemind = NEW_STATE_NAME + str(newStateCount)
-        newStateCount -= 1
+        newStateCount += 1
 
         data[1][i + 1] = newStateNameRemind
 
