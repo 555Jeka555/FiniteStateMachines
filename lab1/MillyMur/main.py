@@ -51,7 +51,8 @@ def readMealyFromCsv(fileName, delimiter=';'):
                 j += 1
             i += 1
 
-        transitions.sort()
+        orderDict = {key: index for index, key in enumerate(millyStates)}
+        transitions = sorted(transitions, key=lambda item: orderDict.get(item.split('/')[0], len(millyStates)))
 
         for transition in transitions:
             newStateName = NEW_STATE_NAME + str(newStateCount)
