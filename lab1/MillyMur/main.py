@@ -96,7 +96,7 @@ def writeToCsv(fileName, data, delimiter=';'):
 
 def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
     data = []
-    width = len(mooreStates.values()) + 1
+    width = len(mooreStates.values()) + len(mooreStates) + 1
     height = len(inputValues) + 2
     remindMealyStates = millyStates.copy()
 
@@ -131,8 +131,6 @@ def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
     # i - сохранился с прошлого цикла, чтобы продолжить записывать дальше
     newStateCount = -1
     for remindMealyState in remindMealyStates:
-        data[0][i + 1] = remindMealyState
-
         newStateNameRemind = NEW_STATE_NAME + str(newStateCount)
         newStateCount -= 1
 
@@ -154,7 +152,16 @@ def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
             j += 1
         i += 1
 
-    return data
+    dataWithoutEmpties = []
+    for i, row in enumerate(data):
+        tmp = []
+        for j, cell in enumerate(row):
+            if len(cell) != 0 or i <= 1 and j == 0:
+                tmp.append(cell)
+
+        dataWithoutEmpties.append(tmp)
+
+    return dataWithoutEmpties
 
 
 def readMooreFromCsv(fileName, delimiter=';'):
