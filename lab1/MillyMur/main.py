@@ -23,6 +23,7 @@ def readMealyFromCsv(fileName, delimiter=';'):
         inputValues = []
         newStateCount = 0
         mooreStates = {}
+        transitions = []
 
         for row in reader:
             data.append(row)
@@ -45,13 +46,19 @@ def readMealyFromCsv(fileName, delimiter=';'):
                     if newStateAlreadyExist:
                         continue
 
-                    newStateName = NEW_STATE_NAME + str(newStateCount)
-                    newStateCount += 1
+                    transitions.append(cell)
 
-                    mooreStates[cell] = newStateName
-                    newStates.append(newStateName)
                 j += 1
             i += 1
+
+        transitions.sort()
+
+        for transition in transitions:
+            newStateName = NEW_STATE_NAME + str(newStateCount)
+            newStateCount += 1
+
+            mooreStates[transition] = newStateName
+            newStates.append(newStateName)
 
         millyInputValue = {}
         i = 0
@@ -233,7 +240,6 @@ if __name__ == '__main__':
         data = convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue)
         printFormattedDict(data)
         writeToCsv(args.outputFileName, data)
-
     elif args.conertType == CONVERT_TYPE_MOORE_TO_MEALY:
         data = readMooreFromCsv(args.inputFileName)
         printFormattedDict(data)
