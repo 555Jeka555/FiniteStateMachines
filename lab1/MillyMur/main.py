@@ -192,7 +192,8 @@ def readMooreFromCsv(fileName, delimiter=';'):
                         millyStates.append(millyState)
                         milly[1][j] = millyState
 
-                    millyStatesWithOut[millyState] = data[0][j]
+                    if j < len(data[0]):
+                        millyStatesWithOut[millyState] = data[0][j]
                 elif i > 1 and j == 0:
                     milly[i][j] = data[i][j]
                 elif i > 1 and j > 0:
