@@ -27,6 +27,8 @@ def readMealyFromCsv(fileName, delimiter=';'):
         for row in reader:
             data.append(row)
 
+        printFormattedDict(data)
+
         mealyStates = []
         for index, state in enumerate(data[0]):
             if index == 0:
@@ -65,6 +67,8 @@ def readMooreFromCsv(fileName, delimiter=';'):
 
         for row in reader:
             data.append(row)
+
+        printFormattedDict(data)
 
         outputs = []
         for index, output in enumerate(data[0]):
