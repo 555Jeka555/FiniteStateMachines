@@ -152,16 +152,17 @@ def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
             j += 1
         i += 1
 
-    dataWithoutEmpties = []
-    for i, row in enumerate(data):
-        tmp = []
-        for j, cell in enumerate(row):
-            if len(cell) != 0 or i <= 1 and j == 0:
-                tmp.append(cell)
+    # Не подходит по формату
+    # dataWithoutEmpties = []
+    # for i, row in enumerate(data):
+    #     tmp = []
+    #     for j, cell in enumerate(row):
+    #         if len(cell) != 0 or i <= 1 and j == 0:
+    #             tmp.append(cell)
+    #
+    #     dataWithoutEmpties.append(tmp)
 
-        dataWithoutEmpties.append(tmp)
-
-    return dataWithoutEmpties
+    return data
 
 
 def readMooreFromCsv(fileName, delimiter=';'):
