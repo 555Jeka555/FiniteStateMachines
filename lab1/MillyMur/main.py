@@ -2,90 +2,16 @@ import csv
 import argparse
 
 NEW_STATE_NAME = 'q'
+STATE_OUTPUT_SEPARATOR = '/'
 CONVERT_TYPE_MEALY_TO_MOORE = 'mealy-to-moore'
 CONVERT_TYPE_MOORE_TO_MEALY = 'moore-to-mealy'
 
 
 def printFormattedDict(data):
     for row in data:
-        formattedRow = " ".join(f"{item:<6}" for item in row)
+        formattedRow = " ".join(f"{item:<7}" for item in row)
         print(formattedRow)
     print()
-
-
-def readMealyFromCsv(fileName, delimiter=';'):
-    with open(fileName, 'r', encoding='ISO-8859-1') as file:
-        reader = csv.reader(file, delimiter=delimiter)
-        data = []
-
-        millyStates = []
-        newStates = []
-        inputValues = []
-        newStateCount = 0
-        mooreStates = {}
-        transitions = []
-
-        for row in reader:
-            data.append(row)
-
-        printFormattedDict(data)
-
-        i = 0
-        for row in data:
-            j = 0
-            for cell in row:
-                if i == 0 and j != 0:
-                    millyStates.append(cell)
-                elif i != 0 and j == 0:
-                    inputValues.append(cell)
-                elif i != 0 and j != 0:
-                    newStateAlreadyExist = False
-                    for key in mooreStates.keys():
-                        if key == cell:
-                            newStateAlreadyExist = True
-                    if newStateAlreadyExist:
-                        continue
-
-                    transitions.append(cell)
-
-                j += 1
-            i += 1
-
-        orderDict = {key: index for index, key in enumerate(millyStates)}
-        transitions = sorted(transitions, key=lambda item: orderDict.get(item.split('/')[0], len(millyStates)))
-
-        for transition in transitions:
-            newStateName = NEW_STATE_NAME + str(newStateCount)
-            newStateCount += 1
-
-            mooreStates[transition] = newStateName
-            newStates.append(newStateName)
-
-        millyInputValue = {}
-        i = 0
-        for row in data:
-            if i == 0:
-                i += 1
-                continue
-
-            currentInputValue = ''
-            j = 0
-            for cell in row:
-                if j == 0:
-                    currentInputValue = cell
-                elif j != 0:
-                    currentState = millyStates[j - 1]
-
-                    if currentInputValue not in millyInputValue:
-                        millyInputValue[currentInputValue] = {}
-
-                    millyInputValue[currentInputValue][currentState] = mooreStates[cell]
-
-                j += 1
-
-            i += 1
-
-        return inputValues, mooreStates, millyStates, millyInputValue
 
 
 def writeToCsv(fileName, data, delimiter=';'):
@@ -93,149 +19,169 @@ def writeToCsv(fileName, data, delimiter=';'):
         writer = csv.writer(file, delimiter=delimiter)
         writer.writerows(data)
 
+def readMealyFromCsv(fileName, delimiter=';'):
+    with open(fileName, 'r', encoding='ISO-8859-1') as file:
+        reader = csv.reader(file, delimiter=delimiter)
+        data = []
 
-def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
-    data = []
-    width = len(mooreStates.values()) + len(mooreStates) + 1
-    height = len(inputValues) + 2
-    remindMealyStates = millyStates.copy()
+        for row in reader:
+            data.append(row)
 
-    for _ in range(height):
-        tmp = []
-        for _ in range(width):
-            tmp.append('')
-        data.append(tmp)
+        printFormattedDict(data)
 
-    i = 0
-    for stateWithOutValue, newState in mooreStates.items():
-        data[0][i + 1] = stateWithOutValue.split('/')[1]  # Для проверки убрать .split('/')[1]
-        data[1][i + 1] = newState
+        mealyStates = []
+        for index, state in enumerate(data[0]):
+            if index == 0:
+                continue
+            mealyStates.append(state.strip())
 
-        j = 0
-        for inputValue in inputValues:
-            data[j + 2][0] = inputValue
+        mealyStateOutputs = {}
+        inputValueToTransitions = {}
+        for index, transitions in enumerate(data):
+            if index == 0:
+                continue
 
-            statesToNewState = millyInputValue[inputValue]
-            for state, newStateFromMealy in statesToNewState.items():
-                millyState = stateWithOutValue.split('/')[0]
-                if state == millyState:
+            inputValue = transitions[0].strip()
 
-                    if state in remindMealyStates:
-                        remindMealyStates.remove(state)
+            for index2, transition in enumerate(transitions[1:]):
+                state = transition.strip().split(STATE_OUTPUT_SEPARATOR)[0]
+                output = transition.strip().split(STATE_OUTPUT_SEPARATOR)[1]
 
-                    data[j + 2][i + 1] = newStateFromMealy
+                if state not in mealyStateOutputs:
+                    mealyStateOutputs[state] = set()
+                mealyStateOutputs[state].add(output)
 
-            j += 1
-        i += 1
+                if inputValue not in inputValueToTransitions:
+                    inputValueToTransitions[inputValue] = {}
+                    inputValueToTransitions[inputValue][mealyStates[index2]] = {}
 
-    # i - сохранился с прошлого цикла, чтобы продолжить записывать дальше
-    newStateCount = len(mooreStates.values()) + 2
-    for remindMealyState in remindMealyStates:
-        newStateNameRemind = NEW_STATE_NAME + str(newStateCount)
-        newStateCount += 1
+                inputValueToTransitions[inputValue][mealyStates[index2]] = state + STATE_OUTPUT_SEPARATOR + output
 
-        data[1][i + 1] = newStateNameRemind
-
-        j = 0
-        for inputValue in inputValues:
-            data[j + 2][0] = inputValue
-
-            statesToNewState = millyInputValue[inputValue]
-            for state, newStateFromMealy in statesToNewState.items():
-                if state != remindMealyState:
-                    continue
-
-                for stateWithOutValue, newState in mooreStates.items():
-                    if newState == newStateFromMealy:
-                        data[j + 2][i + 1] = newStateFromMealy
-
-            j += 1
-        i += 1
-
-    # Не подходит по формату
-    # dataWithoutEmpties = []
-    # for i, row in enumerate(data):
-    #     tmp = []
-    #     for j, cell in enumerate(row):
-    #         if len(cell) != 0 or i <= 1 and j == 0:
-    #             tmp.append(cell)
-    #
-    #     dataWithoutEmpties.append(tmp)
-
-    return data
+        return mealyStates, mealyStateOutputs, inputValueToTransitions
 
 
 def readMooreFromCsv(fileName, delimiter=';'):
     with open(fileName, 'r', encoding='ISO-8859-1') as file:
         reader = csv.reader(file, delimiter=delimiter)
         data = []
-        milly = []
 
         for row in reader:
             data.append(row)
-            tmp = []
-            for i in range(len(row)):
-                tmp.append('')
-            milly.append(tmp)
 
         printFormattedDict(data)
 
-        millyStates = []
-        millyStatesWithOut = {}
+        outputs = []
+        for index, output in enumerate(data[0]):
+            if index == 0:
+                continue
 
-        i = 0
-        for row in data:
-            for j in range(len(row)):
-                if i == 1 and j != 0:
-                    millyState = data[i][j]
+            outputs.append(output.strip())
 
-                    if millyState not in millyStates:
-                        millyStates.append(millyState)
-                        milly[1][j] = millyState
+        mooreStates = []
+        for index, mooreState in enumerate(data[1]):
+            if index == 0:
+                continue
 
-                    if j < len(data[0]):
-                        millyStatesWithOut[millyState] = data[0][j]
-                elif i > 1 and j == 0:
-                    milly[i][j] = data[i][j]
-                elif i > 1 and j > 0:
-                    millyState = data[i][j]
+            mooreStates.append(mooreState.strip())
 
-                    milly[i][j] = millyState + '/' + millyStatesWithOut[millyState]
-            i += 1
+        mooreStateOutputs = {}
+        for index, mooreState in enumerate(mooreStates):
+            output = outputs[index]
+            mooreStateOutputs[mooreState] = output
 
-        milly.pop(0)
+        inputValueToTransitions = {}
+        for index, transitions in enumerate(data):
+            if index <= 1:
+                continue
 
-        return milly
+            inputValue = transitions[0].strip()
 
-# @deprecated
-def convertMooreToMealy(millyInputValues, inputValues):
-    data = []
-    width = len(millyInputValues.keys()) + 1
-    height = len(inputValues) + 1
+            for index2, transition in enumerate(transitions[1:]):
+                state = transition.strip()
+                output = mooreStateOutputs[state]
 
-    for _ in range(height):
-        tmp = []
-        for _ in range(width):
-            tmp.append('')
-        data.append(tmp)
+                if inputValue not in inputValueToTransitions:
+                    inputValueToTransitions[inputValue] = {}
 
-    k = 0
-    for inputValue in inputValues:
-        data[k + 1][0] = inputValue
-        k += 1
+                mooreState = list(mooreStateOutputs.keys())[index2]
+                inputValueToTransitions[inputValue][mooreState] = state + STATE_OUTPUT_SEPARATOR + output
 
-    i = 0
-    for millyState, inputValuesStateWithOut in millyInputValues.items():
-        data[0][i + 1] = millyState
+        return mooreStateOutputs, inputValueToTransitions
 
-        j = 0
-        for inputValue, stateWithOut in inputValuesStateWithOut.items():
-            data[j + 1][i + 1] = stateWithOut
-            j += 1
 
-        i += 1
+def mealyToMoore(inputFileName, outputFileName):
+    mealyStates, mealyStateOutputs, inputValueToTransitions = readMealyFromCsv(inputFileName)
+    mealyToMooreStates = {}
 
-    return data
+    mealyStateOutputs = dict(
+        sorted(mealyStateOutputs.items(),
+               key=lambda item: mealyStates.index(item[0]) if item[0] in mealyStates else float('inf')))
+    for mealyState, output in mealyStateOutputs.items():
+        mealyStateOutputs[mealyState] = sorted(output)
+
+    for mealyState in mealyStates:
+        if mealyState in mealyStateOutputs:
+            for output in mealyStateOutputs[mealyState]:
+                transition = mealyState + STATE_OUTPUT_SEPARATOR + output
+                mealyToMooreStates[transition] = NEW_STATE_NAME + str(len(mealyToMooreStates))
+        else:
+            mealyToMooreStates[mealyState] = NEW_STATE_NAME + str(len(mealyToMooreStates))
+
+    outputsRow = ['']
+    statesRow = ['']
+    for mealyState in mealyStates:
+        if mealyState in mealyStateOutputs:
+            for output in mealyStateOutputs[mealyState]:
+                outputsRow.append(output)
+                statesRow.append(mealyToMooreStates[mealyState + STATE_OUTPUT_SEPARATOR + output])
+        else:
+            outputsRow.append('')
+            statesRow.append(mealyToMooreStates[mealyState])
+
+    transitionsRows = []
+    for inputValue, transitions in inputValueToTransitions.items():
+        row = [inputValue]
+
+        for currentState in transitions:
+            nextState = inputValueToTransitions[inputValue][currentState]
+
+            countOutputs = len(mealyStateOutputs.get(currentState, [1]))
+            for i in range(countOutputs):
+                row.append(mealyToMooreStates[nextState])
+
+        transitionsRows.append(row)
+
+    data = [outputsRow, statesRow]
+    for transitionRow in transitionsRows:
+        data.append(transitionRow)
+
+    printFormattedDict(data)
+    writeToCsv(outputFileName, data)
+
+
+def mooreToMealy(inputFileName, outputFileName):
+    mooreStateOutputs, inputValueToTransitions = readMooreFromCsv(inputFileName)
+
+    statesRow = ['']
+    for mooreState in mooreStateOutputs.keys():
+        statesRow.append(mooreState)
+
+    transitionsRows = []
+    for inputValue, transitions in inputValueToTransitions.items():
+        row = [inputValue]
+
+        for currentState in transitions:
+            nextState = inputValueToTransitions[inputValue][currentState]
+            row.append(nextState)
+
+        transitionsRows.append(row)
+
+    data = [statesRow]
+    for transitionRow in transitionsRows:
+        data.append(transitionRow)
+
+    printFormattedDict(data)
+    writeToCsv(outputFileName, data)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some CSV files.')
@@ -246,13 +192,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.conertType == CONVERT_TYPE_MEALY_TO_MOORE:
-        inputValues, mooreStates, millyStates, millyInputValue = readMealyFromCsv(args.inputFileName)
-        data = convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue)
-        printFormattedDict(data)
-        writeToCsv(args.outputFileName, data)
+        mealyToMoore(args.inputFileName, args.outputFileName)
     elif args.conertType == CONVERT_TYPE_MOORE_TO_MEALY:
-        data = readMooreFromCsv(args.inputFileName)
-        printFormattedDict(data)
-        writeToCsv(args.outputFileName, data)
+        mooreToMealy(args.inputFileName, args.outputFileName)
     else:
         print('Not found')
