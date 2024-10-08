@@ -131,7 +131,7 @@ def mealyToMoore(inputFileName, outputFileName):
                 outputsRow.append(output)
                 statesRow.append(mealyToMooreStates[mealyState + STATE_OUTPUT_SEPARATOR + output])
         else:
-            outputsRow.append("")
+            outputsRow.append('')
             statesRow.append(mealyToMooreStates[mealyState])
 
     transitionsRows = []
