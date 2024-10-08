@@ -12,6 +12,7 @@ def printFormattedDict(data):
         print(formattedRow)
     print()
 
+
 def writeToCsv(fileName, data, delimiter=';'):
     with open(fileName, 'w', newline='', encoding='ISO-8859-1') as file:
         writer = csv.writer(file, delimiter=delimiter)
@@ -173,8 +174,53 @@ def readMealyFromCsv(fileName, delimiter=';'):
 
 def mealyToMoore(inputFileName, outputFileName):
     mealyStates, mealyStateOutputs, inputValueToTransitions = readMealyFromCsv(inputFileName)
+    mealyToMooreStates = {}
 
-    pass
+    mealyStateOutputs = dict(
+        sorted(mealyStateOutputs.items(),
+               key=lambda item: mealyStates.index(item[0]) if item[0] in mealyStates else float('inf')))
+    for mealyState, output in mealyStateOutputs.items():
+        mealyStateOutputs[mealyState] = sorted(output)
+
+    for mealyState in mealyStates:
+        if mealyState in mealyStateOutputs:
+            for output in mealyStateOutputs[mealyState]:
+                transition = mealyState + '/' + output
+                mealyToMooreStates[transition] = NEW_STATE_NAME + str(len(mealyToMooreStates))
+        else:
+            mealyToMooreStates[mealyState] = NEW_STATE_NAME + str(len(mealyToMooreStates))
+
+    outputsRow = ['']
+    statesRow = ['']
+
+    for mealyState in mealyStates:
+        if mealyState in mealyStateOutputs:
+            for output in mealyStateOutputs[mealyState]:
+                outputsRow.append(output)
+                statesRow.append(mealyToMooreStates[mealyState + '/' + output])
+        else:
+            outputsRow.append("")
+            statesRow.append(mealyToMooreStates[mealyState])
+
+    transitionsRows = []
+    for inputValue, transitions in inputValueToTransitions.items():
+        row = [inputValue]
+
+        for currentState in transitions:
+            nextState = inputValueToTransitions[inputValue][currentState]
+
+            countOutputs = len(mealyStateOutputs.get(currentState, [1]))
+            for i in range(countOutputs):
+                row.append(mealyToMooreStates[nextState])
+
+        transitionsRows.append(row)
+
+    data = [outputsRow, statesRow]
+    for transitionRow in transitionsRows:
+        data.append(transitionRow)
+
+    printFormattedDict(data)
+    writeToCsv(outputFileName, data)
 
 
 def mooreToMealy(inputFileName, outputFileName):
