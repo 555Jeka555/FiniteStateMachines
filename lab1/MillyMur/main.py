@@ -18,78 +18,6 @@ def writeToCsv(fileName, data, delimiter=';'):
         writer = csv.writer(file, delimiter=delimiter)
         writer.writerows(data)
 
-
-def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
-    data = []
-    width = len(mooreStates.values()) + len(mooreStates) + 1
-    height = len(inputValues) + 2
-    remindMealyStates = millyStates.copy()
-
-    for _ in range(height):
-        tmp = []
-        for _ in range(width):
-            tmp.append('')
-        data.append(tmp)
-
-    i = 0
-    for stateWithOutValue, newState in mooreStates.items():
-        data[0][i + 1] = stateWithOutValue.split('/')[1]  # Для проверки убрать .split('/')[1]
-        data[1][i + 1] = newState
-
-        j = 0
-        for inputValue in inputValues:
-            data[j + 2][0] = inputValue
-
-            statesToNewState = millyInputValue[inputValue]
-            for state, newStateFromMealy in statesToNewState.items():
-                millyState = stateWithOutValue.split('/')[0]
-                if state == millyState:
-
-                    if state in remindMealyStates:
-                        remindMealyStates.remove(state)
-
-                    data[j + 2][i + 1] = newStateFromMealy
-
-            j += 1
-        i += 1
-
-    # i - сохранился с прошлого цикла, чтобы продолжить записывать дальше
-    newStateCount = len(mooreStates.values()) + 2
-    for remindMealyState in remindMealyStates:
-        newStateNameRemind = NEW_STATE_NAME + str(newStateCount)
-        newStateCount += 1
-
-        data[1][i + 1] = newStateNameRemind
-
-        j = 0
-        for inputValue in inputValues:
-            data[j + 2][0] = inputValue
-
-            statesToNewState = millyInputValue[inputValue]
-            for state, newStateFromMealy in statesToNewState.items():
-                if state != remindMealyState:
-                    continue
-
-                for stateWithOutValue, newState in mooreStates.items():
-                    if newState == newStateFromMealy:
-                        data[j + 2][i + 1] = newStateFromMealy
-
-            j += 1
-        i += 1
-
-    # Не подходит по формату
-    # dataWithoutEmpties = []
-    # for i, row in enumerate(data):
-    #     tmp = []
-    #     for j, cell in enumerate(row):
-    #         if len(cell) != 0 or i <= 1 and j == 0:
-    #             tmp.append(cell)
-    #
-    #     dataWithoutEmpties.append(tmp)
-
-    return data
-
-
 def readMealyFromCsv(fileName, delimiter=';'):
     with open(fileName, 'r', encoding='ISO-8859-1') as file:
         reader = csv.reader(file, delimiter=delimiter)
@@ -163,7 +91,7 @@ def readMooreFromCsv(fileName, delimiter=';'):
 
             inputValue = transitions[0].strip()
 
-            for index2, transition in enumerate(transitions[2:]):
+            for index2, transition in enumerate(transitions[1:]):
                 state = transition.strip()
                 output = mooreStateOutputs[state]
 
@@ -196,7 +124,6 @@ def mealyToMoore(inputFileName, outputFileName):
 
     outputsRow = ['']
     statesRow = ['']
-
     for mealyState in mealyStates:
         if mealyState in mealyStateOutputs:
             for output in mealyStateOutputs[mealyState]:
@@ -230,7 +157,26 @@ def mealyToMoore(inputFileName, outputFileName):
 def mooreToMealy(inputFileName, outputFileName):
     mooreStateOutputs, inputValueToTransitions = readMooreFromCsv(inputFileName)
 
-    pass
+    statesRow = ['']
+    for mooreState in mooreStateOutputs.keys():
+        statesRow.append(mooreState)
+
+    transitionsRows = []
+    for inputValue, transitions in inputValueToTransitions.items():
+        row = [inputValue]
+
+        for currentState in transitions:
+            nextState = inputValueToTransitions[inputValue][currentState]
+            row.append(nextState)
+
+        transitionsRows.append(row)
+
+    data = [statesRow]
+    for transitionRow in transitionsRows:
+        data.append(transitionRow)
+
+    printFormattedDict(data)
+    writeToCsv(outputFileName, data)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some CSV files.')
