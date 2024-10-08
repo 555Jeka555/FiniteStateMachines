@@ -2,13 +2,14 @@ import csv
 import argparse
 
 NEW_STATE_NAME = 'q'
+STATE_OUTPUT_SEPARATOR = '/'
 CONVERT_TYPE_MEALY_TO_MOORE = 'mealy-to-moore'
 CONVERT_TYPE_MOORE_TO_MEALY = 'moore-to-mealy'
 
 
 def printFormattedDict(data):
     for row in data:
-        formattedRow = " ".join(f"{item:<6}" for item in row)
+        formattedRow = " ".join(f"{item:<7}" for item in row)
         print(formattedRow)
     print()
 
@@ -41,8 +42,8 @@ def readMealyFromCsv(fileName, delimiter=';'):
             inputValue = transitions[0].strip()
 
             for index2, transition in enumerate(transitions[1:]):
-                state = transition.strip().split('/')[0]
-                output = transition.strip().split('/')[1]
+                state = transition.strip().split(STATE_OUTPUT_SEPARATOR)[0]
+                output = transition.strip().split(STATE_OUTPUT_SEPARATOR)[1]
 
                 if state not in mealyStateOutputs:
                     mealyStateOutputs[state] = set()
@@ -52,7 +53,7 @@ def readMealyFromCsv(fileName, delimiter=';'):
                     inputValueToTransitions[inputValue] = {}
                     inputValueToTransitions[inputValue][mealyStates[index2]] = {}
 
-                inputValueToTransitions[inputValue][mealyStates[index2]] = state + '/' + output
+                inputValueToTransitions[inputValue][mealyStates[index2]] = state + STATE_OUTPUT_SEPARATOR + output
 
         return mealyStates, mealyStateOutputs, inputValueToTransitions
 
@@ -99,7 +100,7 @@ def readMooreFromCsv(fileName, delimiter=';'):
                     inputValueToTransitions[inputValue] = {}
 
                 mooreState = list(mooreStateOutputs.keys())[index2]
-                inputValueToTransitions[inputValue][mooreState] = state + '/' + output
+                inputValueToTransitions[inputValue][mooreState] = state + STATE_OUTPUT_SEPARATOR + output
 
         return mooreStateOutputs, inputValueToTransitions
 
@@ -117,7 +118,7 @@ def mealyToMoore(inputFileName, outputFileName):
     for mealyState in mealyStates:
         if mealyState in mealyStateOutputs:
             for output in mealyStateOutputs[mealyState]:
-                transition = mealyState + '/' + output
+                transition = mealyState + STATE_OUTPUT_SEPARATOR + output
                 mealyToMooreStates[transition] = NEW_STATE_NAME + str(len(mealyToMooreStates))
         else:
             mealyToMooreStates[mealyState] = NEW_STATE_NAME + str(len(mealyToMooreStates))
@@ -128,7 +129,7 @@ def mealyToMoore(inputFileName, outputFileName):
         if mealyState in mealyStateOutputs:
             for output in mealyStateOutputs[mealyState]:
                 outputsRow.append(output)
-                statesRow.append(mealyToMooreStates[mealyState + '/' + output])
+                statesRow.append(mealyToMooreStates[mealyState + STATE_OUTPUT_SEPARATOR + output])
         else:
             outputsRow.append("")
             statesRow.append(mealyToMooreStates[mealyState])
