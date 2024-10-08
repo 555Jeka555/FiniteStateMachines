@@ -90,49 +90,6 @@ def convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue):
     return data
 
 
-def readMooreFromCsv(fileName, delimiter=';'):
-    with open(fileName, 'r', encoding='ISO-8859-1') as file:
-        reader = csv.reader(file, delimiter=delimiter)
-        data = []
-        milly = []
-
-        for row in reader:
-            data.append(row)
-            tmp = []
-            for i in range(len(row)):
-                tmp.append('')
-            milly.append(tmp)
-
-        printFormattedDict(data)
-
-        millyStates = []
-        millyStatesWithOut = {}
-
-        i = 0
-        for row in data:
-            for j in range(len(row)):
-                if i == 1 and j != 0:
-                    millyState = data[i][j]
-
-                    if millyState not in millyStates:
-                        millyStates.append(millyState)
-                        milly[1][j] = millyState
-
-                    if j < len(data[0]):
-                        millyStatesWithOut[millyState] = data[0][j]
-                elif i > 1 and j == 0:
-                    milly[i][j] = data[i][j]
-                elif i > 1 and j > 0:
-                    millyState = data[i][j]
-
-                    milly[i][j] = millyState + '/' + millyStatesWithOut[millyState]
-            i += 1
-
-        milly.pop(0)
-
-        return milly
-
-
 def readMealyFromCsv(fileName, delimiter=';'):
     with open(fileName, 'r', encoding='ISO-8859-1') as file:
         reader = csv.reader(file, delimiter=delimiter)
@@ -170,6 +127,53 @@ def readMealyFromCsv(fileName, delimiter=';'):
                 inputValueToTransitions[inputValue][mealyStates[index2]] = state + '/' + output
 
         return mealyStates, mealyStateOutputs, inputValueToTransitions
+
+
+def readMooreFromCsv(fileName, delimiter=';'):
+    with open(fileName, 'r', encoding='ISO-8859-1') as file:
+        reader = csv.reader(file, delimiter=delimiter)
+        data = []
+
+        for row in reader:
+            data.append(row)
+
+        outputs = []
+        for index, output in enumerate(data[0]):
+            if index == 0:
+                continue
+
+            outputs.append(output.strip())
+
+        mooreStates = []
+        for index, mooreState in enumerate(data[1]):
+            if index == 0:
+                continue
+
+            mooreStates.append(mooreState.strip())
+
+        mooreStateOutputs = {}
+        for index, mooreState in enumerate(mooreStates):
+            output = outputs[index]
+            mooreStateOutputs[mooreState] = output
+
+        inputValueToTransitions = {}
+        for index, transitions in enumerate(data):
+            if index <= 1:
+                continue
+
+            inputValue = transitions[0].strip()
+
+            for index2, transition in enumerate(transitions[2:]):
+                state = transition.strip()
+                output = mooreStateOutputs[state]
+
+                if inputValue not in inputValueToTransitions:
+                    inputValueToTransitions[inputValue] = {}
+
+                mooreState = list(mooreStateOutputs.keys())[index2]
+                inputValueToTransitions[inputValue][mooreState] = state + '/' + output
+
+        return mooreStateOutputs, inputValueToTransitions
 
 
 def mealyToMoore(inputFileName, outputFileName):
@@ -224,6 +228,8 @@ def mealyToMoore(inputFileName, outputFileName):
 
 
 def mooreToMealy(inputFileName, outputFileName):
+    mooreStateOutputs, inputValueToTransitions = readMooreFromCsv(inputFileName)
+
     pass
 
 if __name__ == '__main__':
@@ -237,6 +243,6 @@ if __name__ == '__main__':
     if args.conertType == CONVERT_TYPE_MEALY_TO_MOORE:
         mealyToMoore(args.inputFileName, args.outputFileName)
     elif args.conertType == CONVERT_TYPE_MOORE_TO_MEALY:
-        mealyToMoore(args.inputFileName, args.outputFileName)
+        mooreToMealy(args.inputFileName, args.outputFileName)
     else:
         print('Not found')
