@@ -12,82 +12,6 @@ def printFormattedDict(data):
         print(formattedRow)
     print()
 
-
-def readMealyFromCsv(fileName, delimiter=';'):
-    with open(fileName, 'r', encoding='ISO-8859-1') as file:
-        reader = csv.reader(file, delimiter=delimiter)
-        data = []
-
-        millyStates = []
-        newStates = []
-        inputValues = []
-        newStateCount = 0
-        mooreStates = {}
-        transitions = []
-
-        for row in reader:
-            data.append(row)
-
-        printFormattedDict(data)
-
-        i = 0
-        for row in data:
-            j = 0
-            for cell in row:
-                if i == 0 and j != 0:
-                    millyStates.append(cell)
-                elif i != 0 and j == 0:
-                    inputValues.append(cell)
-                elif i != 0 and j != 0:
-                    newStateAlreadyExist = False
-                    for key in mooreStates.keys():
-                        if key == cell:
-                            newStateAlreadyExist = True
-                    if newStateAlreadyExist:
-                        continue
-
-                    transitions.append(cell)
-
-                j += 1
-            i += 1
-
-        orderDict = {key: index for index, key in enumerate(millyStates)}
-        transitions = sorted(transitions, key=lambda item: orderDict.get(item.split('/')[0], len(millyStates)))
-
-        for transition in transitions:
-            newStateName = NEW_STATE_NAME + str(newStateCount)
-            newStateCount += 1
-
-            mooreStates[transition] = newStateName
-            newStates.append(newStateName)
-
-        millyInputValue = {}
-        i = 0
-        for row in data:
-            if i == 0:
-                i += 1
-                continue
-
-            currentInputValue = ''
-            j = 0
-            for cell in row:
-                if j == 0:
-                    currentInputValue = cell
-                elif j != 0:
-                    currentState = millyStates[j - 1]
-
-                    if currentInputValue not in millyInputValue:
-                        millyInputValue[currentInputValue] = {}
-
-                    millyInputValue[currentInputValue][currentState] = mooreStates[cell]
-
-                j += 1
-
-            i += 1
-
-        return inputValues, mooreStates, millyStates, millyInputValue
-
-
 def writeToCsv(fileName, data, delimiter=';'):
     with open(fileName, 'w', newline='', encoding='ISO-8859-1') as file:
         writer = csv.writer(file, delimiter=delimiter)
@@ -207,35 +131,54 @@ def readMooreFromCsv(fileName, delimiter=';'):
 
         return milly
 
-# @deprecated
-def convertMooreToMealy(millyInputValues, inputValues):
-    data = []
-    width = len(millyInputValues.keys()) + 1
-    height = len(inputValues) + 1
 
-    for _ in range(height):
-        tmp = []
-        for _ in range(width):
-            tmp.append('')
-        data.append(tmp)
+def readMealyFromCsv(fileName, delimiter=';'):
+    with open(fileName, 'r', encoding='ISO-8859-1') as file:
+        reader = csv.reader(file, delimiter=delimiter)
+        data = []
 
-    k = 0
-    for inputValue in inputValues:
-        data[k + 1][0] = inputValue
-        k += 1
+        for row in reader:
+            data.append(row)
 
-    i = 0
-    for millyState, inputValuesStateWithOut in millyInputValues.items():
-        data[0][i + 1] = millyState
+        mealyStates = []
+        for index, state in enumerate(data[0]):
+            if index == 0:
+                continue
+            mealyStates.append(state.strip())
 
-        j = 0
-        for inputValue, stateWithOut in inputValuesStateWithOut.items():
-            data[j + 1][i + 1] = stateWithOut
-            j += 1
+        mealyStateOutputs = {}
+        inputValueToTransitions = {}
+        for index, transitions in enumerate(data):
+            if index == 0:
+                continue
 
-        i += 1
+            inputValue = transitions[0].strip()
 
-    return data
+            for index2, transition in enumerate(transitions[1:]):
+                state = transition.strip().split('/')[0]
+                output = transition.strip().split('/')[1]
+
+                if state not in mealyStateOutputs:
+                    mealyStateOutputs[state] = set()
+                mealyStateOutputs[state].add(output)
+
+                if inputValue not in inputValueToTransitions:
+                    inputValueToTransitions[inputValue] = {}
+                    inputValueToTransitions[inputValue][mealyStates[index2]] = {}
+
+                inputValueToTransitions[inputValue][mealyStates[index2]] = state + '/' + output
+
+        return mealyStates, mealyStateOutputs, inputValueToTransitions
+
+
+def mealyToMoore(inputFileName, outputFileName):
+    mealyStates, mealyStateOutputs, inputValueToTransitions = readMealyFromCsv(inputFileName)
+
+    pass
+
+
+def mooreToMealy(inputFileName, outputFileName):
+    pass
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some CSV files.')
@@ -246,13 +189,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.conertType == CONVERT_TYPE_MEALY_TO_MOORE:
-        inputValues, mooreStates, millyStates, millyInputValue = readMealyFromCsv(args.inputFileName)
-        data = convertMealyToMoore(inputValues, mooreStates, millyStates, millyInputValue)
-        printFormattedDict(data)
-        writeToCsv(args.outputFileName, data)
+        mealyToMoore(args.inputFileName, args.outputFileName)
     elif args.conertType == CONVERT_TYPE_MOORE_TO_MEALY:
-        data = readMooreFromCsv(args.inputFileName)
-        printFormattedDict(data)
-        writeToCsv(args.outputFileName, data)
+        mealyToMoore(args.inputFileName, args.outputFileName)
     else:
         print('Not found')
