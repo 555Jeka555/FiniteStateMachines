@@ -200,8 +200,12 @@ def splitStates(
         outputs.append(inputValueToTransitions[inputValue][state].split(STATE_INPUT_SEPARATOR)[1])
 
         groupName = prevStateToGroup[groupInput]
-
-        groupInput = list(dict.fromkeys(prevStateToGroup.values())).index(groupName)
+        groupNames = prevStateToGroup.values()
+        unique_group_names = []
+        for group in groupNames:
+            if group not in unique_group_names:
+                unique_group_names.append(group)
+        groupInput = unique_group_names.index(groupName)
         groupInputs.append(str(groupInput))
 
     groupInputsStr = ' '.join(groupInputs)
