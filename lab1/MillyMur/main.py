@@ -221,9 +221,10 @@ def groupStatesToInputs(states, inputValueToTransitions):
 
     while True:
         newGroups, groupOutputs, stateToGroup = splitStatesInGroup(groups, inputValueToTransitions, stateToGroup)
+        isEqual = str(newGroups) == str(groups)
         groups = newGroups
 
-        if str(newGroups) == str(groups):
+        if isEqual:
             break
 
     return groups, groupOutputs
