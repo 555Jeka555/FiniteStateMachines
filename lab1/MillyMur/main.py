@@ -43,25 +43,21 @@ def readMealyFromCsv(fileName, delimiter=';'):
 
         mealyStateOutputs = {}
         inputValueToTransitions = {}
-        for index, transitions in enumerate(data):
-            if index == 0:
-                continue
 
+        for index, transitions in enumerate(data[1:]):
             inputValue = transitions[0].strip()
 
             for index2, transition in enumerate(transitions[1:]):
-                state = transition.strip().split(STATE_OUTPUT_SEPARATOR)[0]
-                output = transition.strip().split(STATE_OUTPUT_SEPARATOR)[1]
+                state, output = transition.strip().split(STATE_OUTPUT_SEPARATOR)
 
                 if state not in mealyStateOutputs:
                     mealyStateOutputs[state] = set()
-                mealyStateOutputs[state].add(output)
+                mealyStateOutputs[state].add(output.strip())
 
                 if inputValue not in inputValueToTransitions:
                     inputValueToTransitions[inputValue] = {}
-                    inputValueToTransitions[inputValue][mealyStates[index2]] = {}
 
-                inputValueToTransitions[inputValue][mealyStates[index2]] = state + STATE_OUTPUT_SEPARATOR + output
+                inputValueToTransitions[inputValue][mealyStates[index2]] = f"{state}{STATE_OUTPUT_SEPARATOR}{output}"
 
         return mealyStates, mealyStateOutputs, inputValueToTransitions
 
@@ -178,75 +174,42 @@ def mooreToMealy(inputFileName, outputFileName):
     writeToCsv(outputFileName, data)
 
 
-def splitStates(
-        groups,
-        groupOutputs,
-        stateToGroup,
-        state,
-        inputValueToTransitions,
-        prevStateToGroup=None,
-        groupPrefix=DEFAULT_GROUP_PREFIX,
-):
-    groupInputs = [groupPrefix]
-    outputs = []
-    for inputValue in inputValueToTransitions:
-        if prevStateToGroup is None:
-            groupInput = inputValueToTransitions[inputValue][state].split(STATE_INPUT_SEPARATOR)[1]
-
-            groupInputs.append(groupInput)
-            continue
-
-        groupInput = inputValueToTransitions[inputValue][state].split(STATE_INPUT_SEPARATOR)[0]
-        outputs.append(inputValueToTransitions[inputValue][state].split(STATE_INPUT_SEPARATOR)[1])
-
-        groupName = prevStateToGroup[groupInput]
-        groupNames = prevStateToGroup.values()
-        unique_group_names = []
-        for group in groupNames:
-            if group not in unique_group_names:
-                unique_group_names.append(group)
-        groupInput = unique_group_names.index(groupName)
-        groupInputs.append(str(groupInput))
-
-    groupInputsStr = ' '.join(groupInputs)
-
-    if groupInputsStr not in groups.keys():
-        groups[groupInputsStr] = []
-    groups[groupInputsStr].append(state)
-    groupOutputs[groupInputsStr] = outputs
-    stateToGroup[state] = groupInputsStr
-
-    return groups, groupOutputs, stateToGroup
-
-
 def splitStatesInGroup(states, inputValueToTransitions, prevStateToGroup=None):
     groups = {}
     groupOutputs = {}
     stateToGroup = {}
 
+    def splitStates(state, groupPrefix=DEFAULT_GROUP_PREFIX):
+        groupInputs = [groupPrefix]
+        outputs = []
+        for inputValue in inputValueToTransitions:
+            if prevStateToGroup is None:
+                groupInput = inputValueToTransitions[inputValue][state].split(STATE_INPUT_SEPARATOR)[1]
+                groupInputs.append(groupInput)
+                continue
+
+            groupInput = inputValueToTransitions[inputValue][state].split(STATE_INPUT_SEPARATOR)[0]
+            outputs.append(inputValueToTransitions[inputValue][state].split(STATE_INPUT_SEPARATOR)[1])
+
+            groupName = prevStateToGroup[groupInput]
+            groupInput = list(dict.fromkeys(prevStateToGroup.values())).index(groupName)
+            groupInputs.append(str(groupInput))
+
+        groupInputsStr = ' '.join(groupInputs)
+
+        if groupInputsStr not in groups.keys():
+            groups[groupInputsStr] = []
+        groups[groupInputsStr].append(state)
+        groupOutputs[groupInputsStr] = outputs
+        stateToGroup[state] = groupInputsStr
+
     if isinstance(states, list):
         for state in states:
-            groups, groupOutputs, stateToGroup = splitStates(
-                groups,
-                groupOutputs,
-                stateToGroup,
-                state,
-                inputValueToTransitions,
-                prevStateToGroup,
-            )
+            splitStates(state)
     else:
         for i, group in enumerate(states, start=1):
             for state in states[group]:
-                groupPrefix = '\\' + str(i)
-                groups, groupOutputs, stateToGroup = splitStates(
-                    groups,
-                    groupOutputs,
-                    stateToGroup,
-                    state,
-                    inputValueToTransitions,
-                    prevStateToGroup,
-                    groupPrefix,
-                )
+                splitStates(state, f'\{i}')
 
     return groups, groupOutputs, stateToGroup
 
@@ -267,7 +230,7 @@ def groupStatesToInputs(states, inputValueToTransitions):
 
 
 def minimizeMealy(inputFileName, outputFileName):
-    mealyStates, mealyStateOutputs, inputValueToTransitions = readMealyFromCsv(inputFileName)
+    mealyStates, _, inputValueToTransitions = readMealyFromCsv(inputFileName)
     groups, groupOutputs = groupStatesToInputs(mealyStates, inputValueToTransitions)
 
     statesRow = ['']
