@@ -13,29 +13,29 @@ def saveMooreToCSV(states, inputs, transitions, path):
 
         states = sorted(states, key=lambda state: not state["isStart"])
 
-        endStatesHeader = ["R" if state["isEnd"] else '' for state in states]
-        writer.writerow([''] + endStatesHeader)
+        writer.writerow([''] + ['F' if s["isEnd"] else '' for s in states])
+        writer.writerow([''] + [s["name"] for s in states])
 
-        stateNamesHeader = [state["name"] for state in states]
-        writer.writerow([''] + stateNamesHeader)
-
-        transitionData = {inputSymbol: [] for inputSymbol in inputs}
+        transition_data = {inputSymbol: [] for inputSymbol in inputs}
 
         for input in inputs:
             for state in states:
-                nextState = transitions.get((state["name"], input), '')
-                transitionData[input].append(f"{','.join(nextState)}")
+                next_state = transitions.get((state["name"], input), '')
+                transition_data[input].append(f"{','.join(next_state)}")
 
         for input in inputs:
-            row = [input] + transitionData[input]
+            row = [input] + transition_data[input]
             writer.writerow(row)
 
 
-def addToAliases(state, aliases, index, isEnd=False, isStart=False):
+def addToAliases(state, aliases, index, isEnd = False, isStart = False):
     if state in aliases:
         return aliases, index
     s = 'q' + str(index)
-    aliases[state] = {"name": s, "isEnd": isEnd, "isStart": isStart}
+    aliases[state] = {}
+    aliases[state]["name"] = s
+    aliases[state]["isEnd"] = isEnd
+    aliases[state]["isStart"] = isStart
     index += 1
     return aliases, index
 
@@ -43,50 +43,10 @@ def addToAliases(state, aliases, index, isEnd=False, isStart=False):
 def prinAliases(aliases):
     for key, value in aliases.items():
         print(key, value["name"])
-
-
+        
+        
 def listAliasesValues(aliases):
     return list(aliases.values())
-
-
-def addTransitionStatesToAliases(transition, aliases, index):
-    if transition["x1"] is not None:
-        aliases, index = addToAliases(transition["x1"], aliases, index)
-    if transition["x2"] is not None:
-        aliases, index = addToAliases(transition["x2"], aliases, index)
-    return aliases, index
-
-
-def createTransitions(grammaTransitions, aliases, isLeft):
-    transitions = {}
-
-    for transition in grammaTransitions:
-        if not isLeft:
-            frm = (aliases[transition["x1"]]["name"], transition["y"])
-            to = getDestinationStateForRight(transition, aliases)
-        else:
-            to = aliases[transition["x1"]]["name"]
-            frm = getSourceStateForLeft(transition, aliases)
-
-        if frm not in transitions:
-            transitions[frm] = []
-        transitions[frm].append(to)
-
-    return transitions
-
-
-def getDestinationStateForRight(transition, aliases):
-    if transition["x2"] is None:
-        return aliases.get("R")["name"]
-    else:
-        return aliases[transition["x2"]]["name"]
-
-
-def getSourceStateForLeft(transition, aliases):
-    if transition["x2"] is None:
-        return aliases.get("L")["name"], transition["y"]
-    else:
-        return aliases[transition["x2"]]["name"], transition["y"]
 
 
 def convertGrammaToMoore(isLeft, grammaTransitions):
@@ -99,10 +59,10 @@ def convertGrammaToMoore(isLeft, grammaTransitions):
     index = 0
 
     if isLeft:
-        aliases, index = addToAliases("L", aliases, index, False, True)
+        aliases, index = addToAliases('H', aliases, index, False, True)
         aliases, index = addToAliases(grammaTransitions[0]["x1"], aliases, index, True)
     else:
-        aliases, index = addToAliases("R", aliases, index, True)
+        aliases, index = addToAliases('F', aliases, index, True)
         aliases, index = addToAliases(grammaTransitions[0]["x1"], aliases, index, False, True)
 
     for transition in grammaTransitions:
@@ -112,9 +72,23 @@ def convertGrammaToMoore(isLeft, grammaTransitions):
             aliases, index = addToAliases(transition["x2"], aliases, index)
 
     for transition in grammaTransitions:
-        aliases, index = addTransitionStatesToAliases(transition, aliases, index)
-
-        transitions = createTransitions(grammaTransitions, aliases, isLeft)
+        to = None
+        frm = None
+        if not isLeft:
+            frm = (aliases[transition["x1"]]["name"], transition["y"])
+            if transition["x2"] is None:
+                to = aliases.get('F')["name"]
+            else:
+                to = aliases[transition["x2"]]["name"]
+        else:
+            to = aliases[transition["x1"]]["name"]
+            if transition["x2"] is None:
+                frm = (aliases.get("H")["name"], transition["y"])
+            else:
+                frm = (aliases[transition["x2"]]["name"], transition["y"])
+        if frm not in transitions:
+            transitions[frm] = []
+        transitions[frm].append(to)
 
     prinAliases(aliases)
 
