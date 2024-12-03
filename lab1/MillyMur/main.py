@@ -13,8 +13,11 @@ def saveMooreToCSV(states, inputs, transitions, path):
 
         states = sorted(states, key=lambda state: not state["isStart"])
 
-        writer.writerow([''] + ['F' if s["isEnd"] else '' for s in states])
-        writer.writerow([''] + [s["name"] for s in states])
+        endStatesHeader = ["R" if s["isEnd"] else '' for s in states]
+        writer.writerow([''] + endStatesHeader)
+
+        stateNamesHeader = [s["name"] for s in states]
+        writer.writerow([''] + stateNamesHeader)
 
         transition_data = {inputSymbol: [] for inputSymbol in inputs}
 
@@ -32,10 +35,7 @@ def addToAliases(state, aliases, index, isEnd = False, isStart = False):
     if state in aliases:
         return aliases, index
     s = 'q' + str(index)
-    aliases[state] = {}
-    aliases[state]["name"] = s
-    aliases[state]["isEnd"] = isEnd
-    aliases[state]["isStart"] = isStart
+    aliases[state] = {"name": s, "isEnd": isEnd, "isStart": isStart}
     index += 1
     return aliases, index
 
@@ -49,6 +49,15 @@ def listAliasesValues(aliases):
     return list(aliases.values())
 
 
+def initializeStartStates(aliases, index, isLeft):
+    if isLeft:
+        aliases, index = addToAliases("L", aliases, index, False, True)
+        return addToAliases(grammaTransitions[0]["x1"], aliases, index, True)
+
+    aliases, index = addToAliases("R", aliases, index, True)
+    return addToAliases(grammaTransitions[0]["x1"], aliases, index, False, True)
+
+
 def convertGrammaToMoore(isLeft, grammaTransitions):
     transitions = {}
     inputs = set()
@@ -58,12 +67,7 @@ def convertGrammaToMoore(isLeft, grammaTransitions):
     aliases = dict()
     index = 0
 
-    if isLeft:
-        aliases, index = addToAliases('H', aliases, index, False, True)
-        aliases, index = addToAliases(grammaTransitions[0]["x1"], aliases, index, True)
-    else:
-        aliases, index = addToAliases('F', aliases, index, True)
-        aliases, index = addToAliases(grammaTransitions[0]["x1"], aliases, index, False, True)
+    aliases, index = initializeStartStates(aliases, index, isLeft)
 
     for transition in grammaTransitions:
         if transition["x1"] is not None:
@@ -72,20 +76,19 @@ def convertGrammaToMoore(isLeft, grammaTransitions):
             aliases, index = addToAliases(transition["x2"], aliases, index)
 
     for transition in grammaTransitions:
-        to = None
-        frm = None
         if not isLeft:
             frm = (aliases[transition["x1"]]["name"], transition["y"])
             if transition["x2"] is None:
-                to = aliases.get('F')["name"]
+                to = aliases.get("R")["name"]
             else:
                 to = aliases[transition["x2"]]["name"]
         else:
             to = aliases[transition["x1"]]["name"]
             if transition["x2"] is None:
-                frm = (aliases.get("H")["name"], transition["y"])
+                frm = (aliases.get("L")["name"], transition["y"])
             else:
                 frm = (aliases[transition["x2"]]["name"], transition["y"])
+
         if frm not in transitions:
             transitions[frm] = []
         transitions[frm].append(to)
@@ -104,7 +107,6 @@ def readGramma(data):
     pattern = RIGHT_GRAMMA_PATTERN
     if isLeft:
         pattern = LEFT_GRAMMA_PATTERN
-
     p = re.compile(pattern, re.MULTILINE)
 
     grammaTransitions = []
@@ -116,10 +118,13 @@ def readGramma(data):
             transition = {"x1": x1}
             yi = 0
             xi = 1
+
             if isLeft:
                 yi, xi, = xi, yi
+
             if len(tdata) == 1:
                 yi = 0
+
             transition["y"] = tdata[yi]
             if len(tdata) == 2:
                 transition["x1"] = x1
