@@ -1,148 +1,159 @@
 import csv
-import re
+from collections import defaultdict, deque
+import sys
+import traceback
 import argparse
 
-DIRECTION_PATTERN = r'<\w+>\s*[\wε]'
-RIGHT_GRAMMA_PATTERN = r'^\s*<(\w+)>\s*->\s*([\wε](?:\s+<\w+>)?(?:\s*\|\s*[\wε](?:\s+<\w+>)?)*)\s*$'
-LEFT_GRAMMA_PATTERN = r'^\s*<(\w+)>\s*->\s*((?:<\w+>\s+)?[\wε](?:\s*\|\s*(?:<\w+>\s+)?[\wε])*)\s*$'
+
+def readNFA(filename):
+    nfa = {
+        'states': [],
+        'alphabet': [],
+        'transitions': defaultdict(lambda: defaultdict(list)),
+        'startState': None,
+        'finalStates': []
+    }
+
+    with open(filename, 'r') as file:
+        reader = csv.reader(file, delimiter=';')
+        headers = next(reader)
+
+        statesLine = next(reader)
+        for i, cell in enumerate(statesLine):
+            if cell:
+                nfa['states'].append(cell)
+                if headers[i] == "F":
+                    nfa['finalStates'].append(cell)
+
+        for row in reader:
+            if row[0]:
+                symbol = row[0]
+                nfa['alphabet'].append(symbol)
+                for i, cell in enumerate(row[1:], start=0):
+                    if cell:
+                        destinations = cell.split(',')
+                        for destination in destinations:
+                            nfa['transitions'][nfa['states'][i]][symbol].append(destination)
+
+    if nfa['states']:
+        nfa['startState'] = nfa['states'][0]
+
+    return nfa
 
 
-def saveMooreToCSV(states, inputs, transitions, path):
-    with open(path, mode='w', newline='') as file:
-        writer = csv.writer(file, delimiter=';')
+def epsilonClosure(nfa, state):
+    closure = {state}
+    toProcess = deque([state])
 
-        states = sorted(states, key=lambda state: not state["isStart"])
+    while toProcess:
+        current = toProcess.popleft()
+        if current in nfa['transitions'] and "ε" in nfa['transitions'][current]:
+            for nextState in nfa['transitions'][current]["ε"]:
+                if nextState not in closure:
+                    closure.add(nextState)
+                    toProcess.append(nextState)
 
-        writer.writerow([''] + ['F' if s["isEnd"] else '' for s in states])
-        writer.writerow([''] + [s["name"] for s in states])
-
-        transition_data = {inputSymbol: [] for inputSymbol in inputs}
-
-        for input in inputs:
-            for state in states:
-                next_state = transitions.get((state["name"], input), '')
-                transition_data[input].append(f"{','.join(next_state)}")
-
-        for input in inputs:
-            row = [input] + transition_data[input]
-            writer.writerow(row)
+    return closure
 
 
-def addToAliases(state, aliases, index, isEnd = False, isStart = False):
-    if state in aliases:
-        return aliases, index
-    s = 'q' + str(index)
-    aliases[state] = {}
-    aliases[state]["name"] = s
-    aliases[state]["isEnd"] = isEnd
-    aliases[state]["isStart"] = isStart
-    index += 1
-    return aliases, index
+def buildDFATransitionTable(nfa):
+    dfa = {
+        'states': set(),
+        'alphabet': [],
+        'transitions': {},
+        'finalStates': set(),
+        'startState': None
+    }
 
+    stateQueue = deque()
 
-def prinAliases(aliases):
-    for key, value in aliases.items():
-        print(key, value["name"])
-        
-        
-def listAliasesValues(aliases):
-    return list(aliases.values())
+    startClosure = epsilonClosure(nfa, nfa['startState'])
+    stateQueue.append(startClosure)
 
+    processedStates = {frozenset(startClosure): "X0"}
+    dfa['startState'] = "X0"
 
-def convertGrammaToMoore(isLeft, grammaTransitions):
-    transitions = {}
-    inputs = set()
-    for transition in grammaTransitions:
-        inputs.add(transition["y"])
+    alphabetDFA = [symbol for symbol in nfa['alphabet'] if symbol != 'ε']
+    dfa['alphabet'] = alphabetDFA
 
-    aliases = dict()
-    index = 0
+    if any(state in nfa['finalStates'] for state in startClosure):
+        dfa['finalStates'].add("X0")
 
-    if isLeft:
-        aliases, index = addToAliases('H', aliases, index, False, True)
-        aliases, index = addToAliases(grammaTransitions[0]["x1"], aliases, index, True)
-    else:
-        aliases, index = addToAliases('F', aliases, index, True)
-        aliases, index = addToAliases(grammaTransitions[0]["x1"], aliases, index, False, True)
+    stateCounter = 1
 
-    for transition in grammaTransitions:
-        if transition["x1"] is not None:
-            aliases, index = addToAliases(transition["x1"], aliases, index)
-        if transition["x2"] is not None:
-            aliases, index = addToAliases(transition["x2"], aliases, index)
+    while stateQueue:
+        currentStates = stateQueue.popleft()
+        currentStateName = processedStates[frozenset(currentStates)]
 
-    for transition in grammaTransitions:
-        to = None
-        frm = None
-        if not isLeft:
-            frm = (aliases[transition["x1"]]["name"], transition["y"])
-            if transition["x2"] is None:
-                to = aliases.get('F')["name"]
+        for symbol in alphabetDFA:
+            reachable = set()
+
+            for state in currentStates:
+                if state in nfa['transitions'] and symbol in nfa['transitions'][state]:
+                    for nextState in nfa['transitions'][state][symbol]:
+                        closure = epsilonClosure(nfa, nextState)
+                        reachable.update(closure)
+
+            if reachable:
+                frozenReachable = frozenset(reachable)
+                if frozenReachable not in processedStates:
+                    newStateName = f"X{stateCounter}"
+                    processedStates[frozenReachable] = newStateName
+                    stateQueue.append(reachable)
+
+                    if any(state in nfa['finalStates'] for state in reachable):
+                        dfa['finalStates'].add(newStateName)
+
+                    stateCounter += 1
+
+                dfa['transitions'].setdefault(currentStateName, {})[symbol] = processedStates[frozenReachable]
             else:
-                to = aliases[transition["x2"]]["name"]
-        else:
-            to = aliases[transition["x1"]]["name"]
-            if transition["x2"] is None:
-                frm = (aliases.get("H")["name"], transition["y"])
-            else:
-                frm = (aliases[transition["x2"]]["name"], transition["y"])
-        if frm not in transitions:
-            transitions[frm] = []
-        transitions[frm].append(to)
+                dfa['transitions'].setdefault(currentStateName, {})[symbol] = ""
 
-    prinAliases(aliases)
-
-    return listAliasesValues(aliases), inputs, transitions
+    return dfa
 
 
-def readGramma(data):
-    print(data)
+def writeDFAToFile(dfa, filename):
+    with open(filename, 'w') as file:
+        renamedState = {state: f"q{i}" for i, state in enumerate(dfa['transitions'].keys())}
 
-    isLeftPatter = re.compile(DIRECTION_PATTERN, re.MULTILINE)
-    isLeft = bool(len(isLeftPatter.findall(data)) > 0)
+        file.write(";")
+        if dfa['startState'] in dfa['finalStates']:
+            file.write("F")
 
-    pattern = RIGHT_GRAMMA_PATTERN
-    if isLeft:
-        pattern = LEFT_GRAMMA_PATTERN
+        for state in dfa['transitions'].keys():
+            if state != dfa['startState']:
+                file.write(f";{'F' if state in dfa['finalStates'] else ''}")
 
-    p = re.compile(pattern, re.MULTILINE)
+        file.write("\n")
 
-    grammaTransitions = []
-    for transit in p.findall(data):
-        x1 = transit[0]
+        file.write(";")
+        file.write(renamedState[dfa['startState']])
 
-        for t in str.split(transit[1], '|'):
-            tdata = str.strip(t).split(" ")
-            transition = {"x1": x1}
-            yi = 0
-            xi = 1
-            if isLeft:
-                yi, xi, = xi, yi
-            if len(tdata) == 1:
-                yi = 0
-            transition["y"] = tdata[yi]
-            if len(tdata) == 2:
-                transition["x1"] = x1
-                transition["x2"] = tdata[xi][1:-1]
-            else:
-                transition["x2"] = None
-            grammaTransitions.append(transition)
+        for state in dfa['transitions'].keys():
+            if state != dfa['startState']:
+                file.write(f";{renamedState[state]}")
 
-    return isLeft, grammaTransitions
+        file.write("\n")
+
+        for symbol in dfa['alphabet']:
+            line = [symbol]
+            for state in dfa['transitions'].keys():
+                nextState = dfa['transitions'][state].get(symbol, "")
+                line.append(renamedState[nextState] if nextState != "" else "")
+            file.write(";".join(line) + "\n")
 
 
-def readFile(path):
-    with open(path) as f:
-        return f.read()
+def determineNFA(inputFile, outputFile):
+    nfa = readNFA(inputFile)
+    dfa = buildDFATransitionTable(nfa)
+    writeDFAToFile(dfa, outputFile)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some CSV files.')
     parser.add_argument('inputFile', type=str, help='Input txt')
     parser.add_argument('outputFile', type=str, help='Output csv')
 
     args = parser.parse_args()
-    content = readFile(args.inputFile)
-    isLeft, grammaTransitions = readGramma(content)
-    states, inputs, transitions = convertGrammaToMoore(isLeft, grammaTransitions)
-    saveMooreToCSV(states, inputs, transitions, args.outputFile)
+    determineNFA(args.inputFile, args.outputFile)
