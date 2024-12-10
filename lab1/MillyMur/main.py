@@ -116,7 +116,10 @@ def buildDFATransitionTable(nfa):
 def writeDFAToFile(dfa, filename):
     with open(filename, 'w') as file:
         renamedState = {state: f"q{i}" for i, state in enumerate(dfa['transitions'].keys())}
-
+        if (len(renamedState) == 0):
+            file.write(";F\n")
+            file.write(";X0")
+            return
         file.write(";")
         if dfa['startState'] in dfa['finalStates']:
             file.write("F")
