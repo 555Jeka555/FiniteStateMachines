@@ -42,6 +42,8 @@ expressions = [
     Expression([SpacesToken, IfToken, SpaceToken, IDToken, SpaceToken, GreaterToken, SpaceToken, IDToken, SpaceToken, ThenToken]),
 
     Expression([VarToken]),
+    Expression([SpacesToken, ProcedureToken, SpaceToken, IDToken, LeftRoundBracketToken, IDToken, ColonToken, SpaceToken, TypeToken, RightRoundBracketToken, EndLineToken]),
+    Expression([SpacesToken, ProcedureToken, SpaceToken, IDToken, LeftRoundBracketToken, VarToken, SpaceToken, IDToken, ColonToken, SpaceToken, TypeToken, RightRoundBracketToken, EndLineToken]),
     Expression([SpacesToken, IDToken, ColonToken, SpaceToken, ArrayTypeToken, DimensionToken, SpaceToken, OfToken, SpaceToken, TypeToken, EndLineToken]),
     Expression([SpacesToken, IDToken, ColonToken, SpaceToken, TypeToken, EndLineToken]),
 

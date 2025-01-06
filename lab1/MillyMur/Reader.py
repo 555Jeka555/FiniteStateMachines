@@ -24,7 +24,7 @@ class Reader:
                     break
 
             if errIdx is not None:
-                print("ERROR", "(", lineIdx, ":", errIdx, ")")
+                print("BAD" + " (" + str(lineIdx) + ", " + str(errIdx) + ")")
                 # return
 
             lineIdx += 1

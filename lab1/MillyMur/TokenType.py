@@ -49,7 +49,7 @@ tokenIdToRegMap = {
                                     "TYPE"
                                     ),
     TokenType.FUNC_TOKEN: Token(TokenType.FUNC_TOKEN, "WRITE|READ|WRITELN|READLN"),
-    TokenType.TYPE_TOKEN: Token(TokenType.TYPE_TOKEN, "BOOLEAN|STRING|TEXT|REAL|INTEGER"),
+    TokenType.TYPE_TOKEN: Token(TokenType.TYPE_TOKEN, "BOOLEAN|STRING|TEXT|FLOAT|INTEGER"),
     TokenType.LITERAL_TOKEN: Token(TokenType.LITERAL_TOKEN, "'" + "(" + ALL_SYM + ")" + "*" + "'"),
     TokenType.INTEGER_TOKEN: Token(TokenType.INTEGER_TOKEN, f"(-({ALL_DIGIT})|(-({ALL_DIGIT_WITHOUT_ZERO})({ALL_DIGIT})+))|(({ALL_DIGIT})|(({ALL_DIGIT_WITHOUT_ZERO})({ALL_DIGIT})+))"),
     TokenType.BOOLEAN_TOKEN: Token(TokenType.BOOLEAN_TOKEN, "TRUE|true|True|FALSE|False|false"),

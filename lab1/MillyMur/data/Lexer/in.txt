@@ -4,6 +4,7 @@ VAR
     x: INTEGER;
     str: ARRAY[1..1] OF INTEGER;
 BEGIN
+    PROCEDURE calculateSum(VAR arr: INTEGER);
     IF a > b THEN
     BEGIN
          WRITE('12');
