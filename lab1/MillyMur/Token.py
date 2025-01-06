@@ -19,8 +19,25 @@ class TokenType(Enum):
     COMMENT_TOKEN = 12
     LINE_COMMENT_TOKEN = 13
     DIMENSION_OF_ARRAY_TOKEN = 14
-    TYPE_ARRAY_TOKEN = 15
-    ARRAY_INDEX_TOKEN = 16
+    ARRAY_INDEX_TOKEN = 15
+    MULTIPLICATION_TOKEN = 16  # *
+    PLUS_TOKEN = 17  # +
+    MINUS_TOKEN = 18  # -
+    DIVIDE_TOKEN = 19  # /
+    SEMICOLON_TOKEN = 20  # ;
+    COMMA_TOKEN = 21  # ,
+    LEFT_PAREN_TOKEN = 22  # (
+    RIGHT_PAREN_TOKEN = 23  # )
+    LEFT_BRACKET_TOKEN = 24  # [
+    RIGHT_BRACKET_TOKEN = 25  # ]
+    EQ_TOKEN = 26  # =
+    GREATER_TOKEN = 27  # >
+    LESS_TOKEN = 28  # <
+    LESS_EQ_TOKEN = 29  # <=
+    GREATER_EQ_TOKEN = 30  # >=
+    NOT_EQ_TOKEN = 31  # <>
+    COLON_TOKEN = 32  # :
+    ASSIGN_OPERATOR = 33  # :=
 
     def convert(self) -> str:
         match self:
@@ -54,10 +71,42 @@ class TokenType(Enum):
                 return "Line Comment Token"
             case TokenType.DIMENSION_OF_ARRAY_TOKEN:
                 return "Dimension Of Array Token"
-            case TokenType.TYPE_ARRAY_TOKEN:
-                return "Type Array Token"
             case TokenType.ARRAY_INDEX_TOKEN:
                 return "Type Array Token"
+            case TokenType.MULTIPLICATION_TOKEN:
+                return "MULTIPLICATION_TOKEN (*)"
+            case TokenType.PLUS_TOKEN:
+                return "PLUS_TOKEN (+)"
+            case TokenType.MINUS_TOKEN:
+                return "MINUS_TOKEN (-)"
+            case TokenType.DIVIDE_TOKEN:
+                return "DIVIDE_TOKEN (/)"
+            case TokenType.SEMICOLON_TOKEN:
+                return "SEMICOLON_TOKEN (;)"
+            case TokenType.COMMA_TOKEN:
+                return "COMMA_TOKEN (,)"
+            case TokenType.LEFT_PAREN_TOKEN:
+                return "LEFT_PAREN_TOKEN (()"
+            case TokenType.RIGHT_PAREN_TOKEN:
+                return "RIGHT_PAREN_TOKEN ())"
+            case TokenType.LEFT_BRACKET_TOKEN:
+                return "LEFT_BRACKET_TOKEN ([)"
+            case TokenType.RIGHT_BRACKET_TOKEN:
+                return "RIGHT_BRACKET_TOKEN (])"
+            case TokenType.EQ_TOKEN:
+                return "EQ_TOKEN (=)"
+            case TokenType.GREATER_TOKEN:
+                return "GREATER_TOKEN (>)"
+            case TokenType.LESS_TOKEN:
+                return "LESS_TOKEN (<)"
+            case TokenType.LESS_EQ_TOKEN:
+                return "LESS_EQ_TOKEN (<=)"
+            case TokenType.GREATER_EQ_TOKEN:
+                return "GREATER_EQ_TOKEN (>=)"
+            case TokenType.NOT_EQ_TOKEN:
+                return "NOT_EQ_TOKEN (<>)"
+            case TokenType.COLON_TOKEN:
+                return "COLON_TOKEN (:)"
             case _:
                 return "Unknown Token Type"
 

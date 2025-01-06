@@ -22,8 +22,7 @@ ALL_SYM_WITH_SPEC = ALL_LET + "|" + ALL_DIGIT + "|" + ALL_SPEC_SYM
 tokenIdToRegMap = {
     TokenType.KEY_WORD_TOKEN: Token(TokenType.KEY_WORD_TOKEN, f"{createAllRegisters('PROGRAM')}|{createAllRegisters('VAR')}|{createAllRegisters('BEGIN')}|{createAllRegisters('END')}|{createAllRegisters('OF')}"),
     TokenType.FUNC_TOKEN: Token(TokenType.FUNC_TOKEN, "WRITE|READ|WRITELN|READLN"),
-    TokenType.TYPE_TOKEN: Token(TokenType.TYPE_TOKEN, "BOOLEAN|STRING|TEXT|REAL|INTEGER"),
-    TokenType.TYPE_ARRAY_TOKEN: Token(TokenType.TYPE_ARRAY_TOKEN, "ARRAY"),
+    TokenType.TYPE_TOKEN: Token(TokenType.TYPE_TOKEN, "BOOLEAN|STRING|TEXT|REAL|INTEGER|ARRAY"),
     TokenType.LITERAL_TOKEN: Token(TokenType.LITERAL_TOKEN, "'" + "(" + ALL_SYM + ")" + "*" + "'"),
     TokenType.INTEGER_TOKEN: Token(TokenType.INTEGER_TOKEN, f"(-({ALL_DIGIT})|(-({ALL_DIGIT_WITHOUT_ZERO})({ALL_DIGIT})+))|(({ALL_DIGIT})|(({ALL_DIGIT_WITHOUT_ZERO})({ALL_DIGIT})+))"),
     TokenType.BOOLEAN_TOKEN: Token(TokenType.BOOLEAN_TOKEN, "TRUE|true|True|FALSE|False|false"),
@@ -51,7 +50,7 @@ BeginToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "BEGIN")
 EndToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "END")
 DotToken = tokenIdToRegMap[TokenType.DOT_TOKEN]
 TypeToken = tokenIdToRegMap[TokenType.TYPE_TOKEN]
-ArrayTypeToken = ConcreteToken(tokenIdToRegMap[TokenType.TYPE_ARRAY_TOKEN], "ARRAY")
+ArrayTypeToken = ConcreteToken(tokenIdToRegMap[TokenType.TYPE_TOKEN], "ARRAY")
 IDToken = tokenIdToRegMap[TokenType.IDENTIFIER_TOKEN]
 IntegerToken = tokenIdToRegMap[TokenType.INTEGER_TOKEN]
 BoolToken = tokenIdToRegMap[TokenType.BOOLEAN_TOKEN]
