@@ -1,12 +1,25 @@
-proGram example;
+PROGRAM example;
+TYPE
 VAR
     x: INTEGER;
     str: ARRAY[1..1] OF INTEGER;
 BEGIN
+    IF a > b THEN
+    BEGIN
+         WRITE('12');
+    END
+    ELSE
+    BEGIN
+        WRITE(a);
+    END;
+
     str[i] := ddd;
     { HELLO WORLD }
     i123 := isdf;
     asd123 := -123;
+    asd123 := 123;
+    asd123 := -123.2;
+    asd123 := 23.2;
     // ffff
 
     a := 12.3;

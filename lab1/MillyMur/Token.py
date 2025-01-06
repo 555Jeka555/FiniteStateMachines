@@ -6,38 +6,37 @@ import RegexToDFA
 class TokenType(Enum):
     EMPTY_TOKEN = 0
     KEY_WORD_TOKEN = 1
-    SEPARATOR_TOKEN = 2
-    IDENTIFIER_TOKEN = 3
-    DOT_TOKEN = 4
-    ASSIGN_TOKEN = 5
-    LITERAL_TOKEN = 6
-    BOOLEAN_TOKEN = 7
-    INTEGER_TOKEN = 8
-    FUNC_TOKEN = 9
-    TYPE_TOKEN = 10
-    FLOAT_TOKEN = 11
-    COMMENT_TOKEN = 12
-    LINE_COMMENT_TOKEN = 13
-    DIMENSION_OF_ARRAY_TOKEN = 14
-    ARRAY_INDEX_TOKEN = 15
-    MULTIPLICATION_TOKEN = 16  # *
-    PLUS_TOKEN = 17  # +
-    MINUS_TOKEN = 18  # -
-    DIVIDE_TOKEN = 19  # /
-    SEMICOLON_TOKEN = 20  # ;
-    COMMA_TOKEN = 21  # ,
-    LEFT_PAREN_TOKEN = 22  # (
-    RIGHT_PAREN_TOKEN = 23  # )
-    LEFT_BRACKET_TOKEN = 24  # [
-    RIGHT_BRACKET_TOKEN = 25  # ]
-    EQ_TOKEN = 26  # =
-    GREATER_TOKEN = 27  # >
-    LESS_TOKEN = 28  # <
-    LESS_EQ_TOKEN = 29  # <=
-    GREATER_EQ_TOKEN = 30  # >=
-    NOT_EQ_TOKEN = 31  # <>
-    COLON_TOKEN = 32  # :
-    ASSIGN_OPERATOR = 33  # :=
+    IDENTIFIER_TOKEN = 2
+    DOT_TOKEN = 3
+    ASSIGN_TOKEN = 4
+    LITERAL_TOKEN = 5
+    BOOLEAN_TOKEN = 6
+    INTEGER_TOKEN = 7
+    FUNC_TOKEN = 8
+    TYPE_TOKEN = 9
+    FLOAT_TOKEN = 10
+    COMMENT_TOKEN = 11
+    LINE_COMMENT_TOKEN = 12
+    DIMENSION_OF_ARRAY_TOKEN = 13
+    ARRAY_INDEX_TOKEN = 14
+
+    MULTIPLICATION_TOKEN = 15  # *
+    PLUS_TOKEN = 16  # +
+    MINUS_TOKEN = 17  # -
+    DIVIDE_TOKEN = 18  # /
+    SEMICOLON_TOKEN = 19  # ;
+    COMMA_TOKEN = 20  # ,
+    LEFT_PAREN_TOKEN = 21  # (
+    RIGHT_PAREN_TOKEN = 22  # )
+    LEFT_BRACKET_TOKEN = 23  # [
+    RIGHT_BRACKET_TOKEN = 24  # ]
+    EQ_TOKEN = 25  # =
+    GREATER_TOKEN = 26  # >
+    LESS_TOKEN = 27  # <
+    LESS_EQ_TOKEN = 28  # <=
+    GREATER_EQ_TOKEN = 29  # >=
+    NOT_EQ_TOKEN = 30  # <>
+    COLON_TOKEN = 31  # :
 
     def convert(self) -> str:
         match self:
@@ -45,8 +44,6 @@ class TokenType(Enum):
                 return "Empty Token"
             case TokenType.KEY_WORD_TOKEN:
                 return "Keyword Token"
-            case TokenType.SEPARATOR_TOKEN:
-                return "Separator Token"
             case TokenType.IDENTIFIER_TOKEN:
                 return "Identifier Token"
             case TokenType.DOT_TOKEN:

@@ -6,7 +6,7 @@ class Expression:
     def __init__(self, tokens: List[IRegular]):
         self.tokens = tokens
 
-    def handle(self, lineIdx: int,  string: str) -> [str, int | None]:
+    def handle(self, lineIdx: int, string: str) -> [str, int | None]:
         start = 0
         result = ""
         for token in self.tokens:
@@ -28,12 +28,18 @@ class Expression:
         print(result, end="")
         return result, None
 
-
 expressions = [
     Expression([ProgramToken, SpaceToken, IDToken, EndLineToken]),
 
     Expression([BeginToken]),
+    Expression([SpacesToken, BeginToken]),
     Expression([EndToken, DotToken]),
+    Expression([SpacesToken, EndToken]),
+    Expression([SpacesToken, EndToken, EndLineToken]),
+    Expression([TypeKeyToken]),
+    Expression([SpacesToken, ElseToken]),
+
+    Expression([SpacesToken, IfToken, SpaceToken, IDToken, SpaceToken, GreaterToken, SpaceToken, IDToken, SpaceToken, ThenToken]),
 
     Expression([VarToken]),
     Expression([SpacesToken, IDToken, ColonToken, SpaceToken, ArrayTypeToken, DimensionToken, SpaceToken, OfToken, SpaceToken, TypeToken, EndLineToken]),
@@ -46,21 +52,22 @@ expressions = [
     Expression([SpacesToken, IDToken, SpaceToken, AssignToken, SpaceToken, LiteralToken, EndLineToken]),
     Expression([SpacesToken, IDToken, SpaceToken, AssignToken, SpaceToken, FloatToken, EndLineToken]),
 
-    Expression([TabToken, WriteToken, LeftRoundBracketToken, IDToken, RightRoundBracketToken, EndLineToken]),
-    Expression([TabToken, WriteToken, LeftRoundBracketToken, LiteralToken, RightRoundBracketToken, EndLineToken]),
-    Expression([TabToken, ReadToken, EndLineToken]),
-    Expression([TabToken, ReadToken, LeftRoundBracketToken, RightRoundBracketToken, EndLineToken]),
-    Expression([TabToken, ReadToken, LeftRoundBracketToken, IDToken, RightRoundBracketToken, EndLineToken]),
+    Expression([SpacesToken, WriteToken, LeftRoundBracketToken, IDToken, RightRoundBracketToken, EndLineToken]),
+    Expression([SpacesToken, WriteToken, LeftRoundBracketToken, LiteralToken, RightRoundBracketToken, EndLineToken]),
+    Expression([SpacesToken, ReadToken, EndLineToken]),
+    Expression([SpacesToken, ReadToken, LeftRoundBracketToken, RightRoundBracketToken, EndLineToken]),
+    Expression([SpacesToken, ReadToken, LeftRoundBracketToken, IDToken, RightRoundBracketToken, EndLineToken]),
 
-    Expression([TabToken, WritelnToken, EndLineToken]),
-    Expression([TabToken, WritelnToken, LeftRoundBracketToken, IDToken, RightRoundBracketToken, EndLineToken]),
-    Expression([TabToken, WritelnToken, LeftRoundBracketToken, LiteralToken, RightRoundBracketToken, EndLineToken]),
-    Expression([TabToken, ReadlnToken, EndLineToken]),
-    Expression([TabToken, ReadlnToken, LeftRoundBracketToken, IDToken, RightRoundBracketToken, EndLineToken]),
-    Expression([TabToken, ReadlnToken, LeftRoundBracketToken, RightRoundBracketToken, EndLineToken]),
+    Expression([SpacesToken, WritelnToken, EndLineToken]),
+    Expression([SpacesToken, WritelnToken, LeftRoundBracketToken, IDToken, RightRoundBracketToken, EndLineToken]),
+    Expression([SpacesToken, WritelnToken, LeftRoundBracketToken, LiteralToken, RightRoundBracketToken, EndLineToken]),
+    Expression([SpacesToken, ReadlnToken, EndLineToken]),
+    Expression([SpacesToken, ReadlnToken, LeftRoundBracketToken, IDToken, RightRoundBracketToken, EndLineToken]),
+    Expression([SpacesToken, ReadlnToken, LeftRoundBracketToken, RightRoundBracketToken, EndLineToken]),
 
     Expression([SpacesToken, CommentToken]),
     Expression([SpacesToken, LineCommentToken]),
 ]
+
 
 
