@@ -1,26 +1,25 @@
+proGram example;
+VAR
+    x: INTEGER;
+    str: ARRAY[1..1] OF INTEGER;
 BEGIN
-    /// HELLO WORLD ///
-    VAR BOOLEAN i123&
-    i123 := isdf&
-    asd123 := 123&
+    str[i] := ddd;
+    { HELLO WORLD }
+    i123 := isdf;
+    asd123 := -123;
+    // ffff
 
-    asd124 := TRUE&
-    asd124 := True&
-    a125 := False&
-    fa123 := 12331.123&
-    /// fa123 := .123& no works ///
-    /// 123///
-    a125 := FALSE&
-    b125 := 'apksldo1212asdasd'&
-    WRITE['12']&
-    WRITE[a12]&
-    READ&
-    READ[]&
-    READ[a12]&
-    WRITELN&
-    WRITELN['12']&
-    WRITELN[a12]&
-    READLN&
-    READ[]&
-    READ[a12]&
+    a := 12.3;
+
+    WRITE('12');
+    WRITE(a12);
+    READ;
+    READ();
+    READ(a12);
+    WRITELN;
+    WRITELN('12');
+    WRITELN(a12);
+    READLN;
+    READ();
+    READ(a12);
 END.

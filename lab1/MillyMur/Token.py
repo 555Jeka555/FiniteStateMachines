@@ -17,6 +17,10 @@ class TokenType(Enum):
     TYPE_TOKEN = 10
     FLOAT_TOKEN = 11
     COMMENT_TOKEN = 12
+    LINE_COMMENT_TOKEN = 13
+    DIMENSION_OF_ARRAY_TOKEN = 14
+    TYPE_ARRAY_TOKEN = 15
+    ARRAY_INDEX_TOKEN = 16
 
     def convert(self) -> str:
         match self:
@@ -46,6 +50,14 @@ class TokenType(Enum):
                 return "Float Token"
             case TokenType.COMMENT_TOKEN:
                 return "Comment Token"
+            case TokenType.LINE_COMMENT_TOKEN:
+                return "Line Comment Token"
+            case TokenType.DIMENSION_OF_ARRAY_TOKEN:
+                return "Dimension Of Array Token"
+            case TokenType.TYPE_ARRAY_TOKEN:
+                return "Type Array Token"
+            case TokenType.ARRAY_INDEX_TOKEN:
+                return "Type Array Token"
             case _:
                 return "Unknown Token Type"
 
@@ -93,7 +105,7 @@ class ConcreteToken(IRegular):
         token, val, errIndx = self.token.handle(string, start)
         if errIndx is not None:
             return token, val, errIndx
-        if val != self.value:
+        if val.upper() != self.value.upper():
             return token, "", start
         return token, val, None
 
