@@ -74,39 +74,39 @@ class TokenType(Enum):
             case TokenType.ARRAY_INDEX_TOKEN:
                 return "Type Array Token"
             case TokenType.MULTIPLICATION_TOKEN:
-                return "MULTIPLICATION_TOKEN (*)"
+                return "MULTIPLICATION"
             case TokenType.PLUS_TOKEN:
-                return "PLUS_TOKEN (+)"
+                return "PLUS"
             case TokenType.MINUS_TOKEN:
-                return "MINUS_TOKEN (-)"
+                return "MINUS"
             case TokenType.DIVIDE_TOKEN:
-                return "DIVIDE_TOKEN (/)"
+                return "DIVIDE"
             case TokenType.SEMICOLON_TOKEN:
-                return "SEMICOLON_TOKEN (;)"
+                return "SEMICOLON"
             case TokenType.COMMA_TOKEN:
-                return "COMMA_TOKEN (,)"
+                return "COMMA"
             case TokenType.LEFT_PAREN_TOKEN:
-                return "LEFT_PAREN_TOKEN (()"
+                return "LEFT_PAREN"
             case TokenType.RIGHT_PAREN_TOKEN:
-                return "RIGHT_PAREN_TOKEN ())"
+                return "RIGHT_PAREN"
             case TokenType.LEFT_BRACKET_TOKEN:
-                return "LEFT_BRACKET_TOKEN ([)"
+                return "LEFT_BRACKET"
             case TokenType.RIGHT_BRACKET_TOKEN:
-                return "RIGHT_BRACKET_TOKEN (])"
+                return "RIGHT_BRACKET"
             case TokenType.EQ_TOKEN:
-                return "EQ_TOKEN (=)"
+                return "EQ"
             case TokenType.GREATER_TOKEN:
-                return "GREATER_TOKEN (>)"
+                return "GREATE"
             case TokenType.LESS_TOKEN:
-                return "LESS_TOKEN (<)"
+                return "LESS"
             case TokenType.LESS_EQ_TOKEN:
-                return "LESS_EQ_TOKEN (<=)"
+                return "LESS_EQ"
             case TokenType.GREATER_EQ_TOKEN:
-                return "GREATER_EQ_TOKEN (>=)"
+                return "GREATER_EQ"
             case TokenType.NOT_EQ_TOKEN:
-                return "NOT_EQ_TOKEN (<>)"
+                return "NOT_EQ"
             case TokenType.COLON_TOKEN:
-                return "COLON_TOKEN (:)"
+                return "COLON"
             case _:
                 return "Unknown Token Type"
 
