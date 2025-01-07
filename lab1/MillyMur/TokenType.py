@@ -43,7 +43,6 @@ tokenIdToRegMap = {
     TokenType.FLOAT_TOKEN: Token(TokenType.FLOAT_TOKEN, f"(-(({ALL_DIGIT})+).(({ALL_DIGIT})+))|((({ALL_DIGIT})+).(({ALL_DIGIT})+))"),
     TokenType.COMMENT_TOKEN: Token(TokenType.COMMENT_TOKEN, "({)" + f"({ALL_SYM_WITH_SPEC})*" + "(})"),
     TokenType.LINE_COMMENT_TOKEN: Token(TokenType.LINE_COMMENT_TOKEN, "(//)" + f"({ALL_SYM_WITH_SPEC})*"),
-    TokenType.DIMENSION_OF_ARRAY_TOKEN: Token(TokenType.DIMENSION_OF_ARRAY_TOKEN, f"[({ALL_DIGIT_WITHOUT_ZERO})+(..)({ALL_DIGIT_WITHOUT_ZERO})({ALL_DIGIT})*]"),
 
     TokenType.DOT_TOKEN: Token(TokenType.DOT_TOKEN, "."),
     TokenType.ASSIGN_TOKEN: Token(TokenType.ASSIGN_TOKEN, ":="),
@@ -103,8 +102,6 @@ ReadlnToken = ConcreteToken(tokenIdToRegMap[TokenType.FUNC_TOKEN], "READLN")
 CommentToken = tokenIdToRegMap[TokenType.COMMENT_TOKEN]
 LineCommentToken = tokenIdToRegMap[TokenType.LINE_COMMENT_TOKEN]
 FloatToken = tokenIdToRegMap[TokenType.FLOAT_TOKEN]
-
-DimensionToken = tokenIdToRegMap[TokenType.DIMENSION_OF_ARRAY_TOKEN]
 
 DotToken = tokenIdToRegMap[TokenType.DOT_TOKEN]
 AssignToken = tokenIdToRegMap[TokenType.ASSIGN_TOKEN]

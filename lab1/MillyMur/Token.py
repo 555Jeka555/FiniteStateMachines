@@ -17,7 +17,6 @@ class TokenType(Enum):
     FLOAT_TOKEN = 10
     COMMENT_TOKEN = 11
     LINE_COMMENT_TOKEN = 12
-    DIMENSION_OF_ARRAY_TOKEN = 13
 
     MULTIPLICATION_TOKEN = 15  # *
     PLUS_TOKEN = 16  # +
@@ -65,8 +64,6 @@ class TokenType(Enum):
                 return "COMMENT"
             case TokenType.LINE_COMMENT_TOKEN:
                 return "LINE COMMENT"
-            case TokenType.DIMENSION_OF_ARRAY_TOKEN:
-                return "DIMENSION OF ARRAY"
             case TokenType.MULTIPLICATION_TOKEN:
                 return "MULTIPLICATION"
             case TokenType.PLUS_TOKEN:
