@@ -18,7 +18,6 @@ class TokenType(Enum):
     COMMENT_TOKEN = 11
     LINE_COMMENT_TOKEN = 12
     DIMENSION_OF_ARRAY_TOKEN = 13
-    ARRAY_INDEX_TOKEN = 14
 
     MULTIPLICATION_TOKEN = 15  # *
     PLUS_TOKEN = 16  # +
@@ -41,35 +40,33 @@ class TokenType(Enum):
     def convert(self) -> str:
         match self:
             case TokenType.EMPTY_TOKEN:
-                return "Empty Token"
+                return "EMPTY"
             case TokenType.KEY_WORD_TOKEN:
-                return "Keyword Token"
+                return "KEYWORD"
             case TokenType.IDENTIFIER_TOKEN:
-                return "Identifier Token"
+                return "IDENTIFIER"
             case TokenType.DOT_TOKEN:
-                return "Dot Token"
+                return "DOT"
             case TokenType.ASSIGN_TOKEN:
-                return "Assign Token"
+                return "ASSIGN"
             case TokenType.LITERAL_TOKEN:
-                return "Literal Token"
+                return "LITERAL"
             case TokenType.BOOLEAN_TOKEN:
-                return "Boolean Token"
+                return "BOOLEAN"
             case TokenType.INTEGER_TOKEN:
-                return "Integer Token"
+                return "INTEGER"
             case TokenType.FUNC_TOKEN:
-                return "Function Token"
+                return "FUNCTION"
             case TokenType.TYPE_TOKEN:
-                return "Type Token"
+                return "TYPE"
             case TokenType.FLOAT_TOKEN:
-                return "Float Token"
+                return "FLOAT"
             case TokenType.COMMENT_TOKEN:
-                return "Comment Token"
+                return "COMMENT"
             case TokenType.LINE_COMMENT_TOKEN:
-                return "Line Comment Token"
+                return "LINE COMMENT"
             case TokenType.DIMENSION_OF_ARRAY_TOKEN:
-                return "Dimension Of Array Token"
-            case TokenType.ARRAY_INDEX_TOKEN:
-                return "Type Array Token"
+                return "DIMENSION OF ARRAY"
             case TokenType.MULTIPLICATION_TOKEN:
                 return "MULTIPLICATION"
             case TokenType.PLUS_TOKEN:
@@ -83,25 +80,25 @@ class TokenType(Enum):
             case TokenType.COMMA_TOKEN:
                 return "COMMA"
             case TokenType.LEFT_PAREN_TOKEN:
-                return "LEFT_PAREN"
+                return "LEFT PAREN"
             case TokenType.RIGHT_PAREN_TOKEN:
-                return "RIGHT_PAREN"
+                return "RIGHT PAREN"
             case TokenType.LEFT_BRACKET_TOKEN:
-                return "LEFT_BRACKET"
+                return "LEFT BRACKET"
             case TokenType.RIGHT_BRACKET_TOKEN:
-                return "RIGHT_BRACKET"
+                return "RIGHT BRACKET"
             case TokenType.EQ_TOKEN:
                 return "EQ"
             case TokenType.GREATER_TOKEN:
-                return "GREATE"
+                return "GREATER"
             case TokenType.LESS_TOKEN:
                 return "LESS"
             case TokenType.LESS_EQ_TOKEN:
-                return "LESS_EQ"
+                return "LESS EQ"
             case TokenType.GREATER_EQ_TOKEN:
-                return "GREATER_EQ"
+                return "GREATER EQ"
             case TokenType.NOT_EQ_TOKEN:
-                return "NOT_EQ"
+                return "NOT EQ"
             case TokenType.COLON_TOKEN:
                 return "COLON"
             case _:

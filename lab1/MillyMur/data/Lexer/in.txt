@@ -15,6 +15,7 @@ BEGIN
     END;
 
     str[i] := ddd;
+    str[1] := ddd;
     { HELLO WORLD }
     i123 := isdf;
     asd123 := -123;

@@ -20,20 +20,6 @@ ALL_SYM = ALL_LET + "|" + ALL_DIGIT
 ALL_SYM_WITH_SPEC = ALL_LET + "|" + ALL_DIGIT + "|" + ALL_SPEC_SYM
 
 tokenIdToRegMap = {
-    # TokenType.KEY_WORD_TOKEN: Token(TokenType.KEY_WORD_TOKEN,
-    #                                     f"{createAllRegisters('PROGRAM')}|"
-    #                                     f"{createAllRegisters('VAR')}|"
-    #                                     f"{createAllRegisters('BEGIN')}|"
-    #                                     f"{createAllRegisters('END')}|"
-    #                                     f"{createAllRegisters('OF')}|"
-    #                                     f"{createAllRegisters('ARRAY')}|"
-    #                                     f"{createAllRegisters('IF')}|"
-    #                                     f"{createAllRegisters('OR')}|"
-    #                                     f"{createAllRegisters('PROCEDURE')}|"
-    #                                     f"{createAllRegisters('THEN')}|"
-    #                                     f"{createAllRegisters('ELSE')}|"
-    #                                     f"{createAllRegisters('TYPE')}|"
-    #                                     ),
     TokenType.KEY_WORD_TOKEN: Token(TokenType.KEY_WORD_TOKEN,
                                     "PROGRAM|"
                                     "VAR|"
@@ -51,14 +37,13 @@ tokenIdToRegMap = {
     TokenType.FUNC_TOKEN: Token(TokenType.FUNC_TOKEN, "WRITE|READ|WRITELN|READLN"),
     TokenType.TYPE_TOKEN: Token(TokenType.TYPE_TOKEN, "BOOLEAN|STRING|TEXT|FLOAT|INTEGER"),
     TokenType.LITERAL_TOKEN: Token(TokenType.LITERAL_TOKEN, "'" + "(" + ALL_SYM + ")" + "*" + "'"),
-    TokenType.INTEGER_TOKEN: Token(TokenType.INTEGER_TOKEN, f"(-({ALL_DIGIT})|(-({ALL_DIGIT_WITHOUT_ZERO})({ALL_DIGIT})+))|(({ALL_DIGIT})|(({ALL_DIGIT_WITHOUT_ZERO})({ALL_DIGIT})+))"),
+    TokenType.INTEGER_TOKEN: Token(TokenType.INTEGER_TOKEN, f"(-(({ALL_DIGIT})+))|((({ALL_DIGIT})+))"),
     TokenType.BOOLEAN_TOKEN: Token(TokenType.BOOLEAN_TOKEN, "TRUE|true|True|FALSE|False|false"),
     TokenType.IDENTIFIER_TOKEN: Token(TokenType.IDENTIFIER_TOKEN, "(" + ALL_LET_LOWER + ")" + "(" + ALL_SYM + ")" + "*"),
     TokenType.FLOAT_TOKEN: Token(TokenType.FLOAT_TOKEN, f"(-(({ALL_DIGIT})+).(({ALL_DIGIT})+))|((({ALL_DIGIT})+).(({ALL_DIGIT})+))"),
     TokenType.COMMENT_TOKEN: Token(TokenType.COMMENT_TOKEN, "({)" + f"({ALL_SYM_WITH_SPEC})*" + "(})"),
     TokenType.LINE_COMMENT_TOKEN: Token(TokenType.LINE_COMMENT_TOKEN, "(//)" + f"({ALL_SYM_WITH_SPEC})*"),
     TokenType.DIMENSION_OF_ARRAY_TOKEN: Token(TokenType.DIMENSION_OF_ARRAY_TOKEN, f"[({ALL_DIGIT_WITHOUT_ZERO})+(..)({ALL_DIGIT_WITHOUT_ZERO})({ALL_DIGIT})*]"),
-    TokenType.ARRAY_INDEX_TOKEN: Token(TokenType.ARRAY_INDEX_TOKEN, f"[({ALL_SYM})+]"),
 
     TokenType.DOT_TOKEN: Token(TokenType.DOT_TOKEN, "."),
     TokenType.ASSIGN_TOKEN: Token(TokenType.ASSIGN_TOKEN, ":="),
@@ -120,7 +105,6 @@ LineCommentToken = tokenIdToRegMap[TokenType.LINE_COMMENT_TOKEN]
 FloatToken = tokenIdToRegMap[TokenType.FLOAT_TOKEN]
 
 DimensionToken = tokenIdToRegMap[TokenType.DIMENSION_OF_ARRAY_TOKEN]
-ArrayIndexToken = tokenIdToRegMap[TokenType.ARRAY_INDEX_TOKEN]
 
 DotToken = tokenIdToRegMap[TokenType.DOT_TOKEN]
 AssignToken = tokenIdToRegMap[TokenType.ASSIGN_TOKEN]
