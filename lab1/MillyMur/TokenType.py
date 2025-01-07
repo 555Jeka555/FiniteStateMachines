@@ -8,10 +8,14 @@ def createAllRegisters(word: str) -> [str]:
     return '|'.join(combinations)
 
 SEMICOLON = "<ES>"
-LEFT_ROUND_BRACKET = "<LRB>"
+LEFT_PAREN_BRACKET = "<LRB>"
 RIGHT_ROUND_BRACKET = "<RRB>"
-ALL_DIGIT = "0|1|2|3|4|5|6|7|8|9"
+PLUS = "<PLUS>"
+MULT = "<MULT>"
+
+UNDERLINE = "_"
 ALL_DIGIT_WITHOUT_ZERO = "1|2|3|4|5|6|7|8|9"
+ALL_DIGIT = f"0|{ALL_DIGIT_WITHOUT_ZERO}"
 ALL_LET_LOWER = "a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z"
 ALL_LET_UPPER = "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z"
 ALL_LET = ALL_LET_LOWER + "|" + ALL_LET_UPPER
@@ -39,7 +43,7 @@ tokenIdToRegMap = {
     TokenType.LITERAL_TOKEN: Token(TokenType.LITERAL_TOKEN, "'" + "(" + ALL_SYM + ")" + "*" + "'"),
     TokenType.INTEGER_TOKEN: Token(TokenType.INTEGER_TOKEN, f"(-(({ALL_DIGIT})+))|((({ALL_DIGIT})+))"),
     TokenType.BOOLEAN_TOKEN: Token(TokenType.BOOLEAN_TOKEN, "TRUE|true|True|FALSE|False|false"),
-    TokenType.IDENTIFIER_TOKEN: Token(TokenType.IDENTIFIER_TOKEN, "(" + ALL_LET_LOWER + ")" + "(" + ALL_SYM + ")" + "*"),
+    TokenType.IDENTIFIER_TOKEN: Token(TokenType.IDENTIFIER_TOKEN, "(" + UNDERLINE + "|" + ALL_LET_LOWER + ")" + "(" + UNDERLINE + "|" + ALL_SYM + ")" + "*"),
     TokenType.FLOAT_TOKEN: Token(TokenType.FLOAT_TOKEN, f"(-(({ALL_DIGIT})+).(({ALL_DIGIT})+))|((({ALL_DIGIT})+).(({ALL_DIGIT})+))"),
     TokenType.COMMENT_TOKEN: Token(TokenType.COMMENT_TOKEN, "({)" + f"({ALL_SYM_WITH_SPEC})*" + "(})"),
     TokenType.LINE_COMMENT_TOKEN: Token(TokenType.LINE_COMMENT_TOKEN, "(//)" + f"({ALL_SYM_WITH_SPEC})*"),
@@ -69,7 +73,7 @@ SpaceToken = EmptyToken(" ")
 ColonToken = EmptyToken(":")
 TabToken = EmptyToken("(    )")
 SpacesToken = EmptyToken("( )*")
-LeftRoundBracketToken = EmptyToken(LEFT_ROUND_BRACKET)
+LeftRoundBracketToken = EmptyToken(LEFT_PAREN_BRACKET)
 RightRoundBracketToken = EmptyToken(RIGHT_ROUND_BRACKET)
 
 ProgramToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "PROGRAM")

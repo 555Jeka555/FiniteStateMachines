@@ -20,7 +20,11 @@ if __name__ == "__main__":
 
     with open('./data/Lexer/in.txt', 'r', encoding='utf-8') as f:
         data = f.read()
+
         data = data.replace(";", TokenType.SEMICOLON)
-        data = data.replace("(", TokenType.LEFT_ROUND_BRACKET)
+        data = data.replace("(", TokenType.LEFT_PAREN_BRACKET)
         data = data.replace(")", TokenType.RIGHT_ROUND_BRACKET)
+        data = data.replace("+", TokenType.PLUS)
+        data = data.replace("*", TokenType.MULT)
+
         reader.handle(data)

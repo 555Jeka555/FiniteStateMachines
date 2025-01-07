@@ -1,3 +1,4 @@
+import TokenType
 from TokenType import *
 from typing import List
 
@@ -14,11 +15,13 @@ class Expression:
             token.reset()
             if errIdx is not None:
                 return result, errIdx
-            elif tokenId != TokenType.EMPTY_TOKEN:
+            elif tokenId != TokenType.EMPTY_TOKEN and not (tokenId == TokenType.COMMENT_TOKEN and len(find) == 0):
 
                 findOut = find.replace(SEMICOLON, ";")
-                findOut = findOut.replace(LEFT_ROUND_BRACKET, "(")
+                findOut = findOut.replace(LEFT_PAREN_BRACKET, "(")
                 findOut = findOut.replace(RIGHT_ROUND_BRACKET, ")")
+                findOut = findOut.replace(PLUS, "+")
+                findOut = findOut.replace(MULT, "*")
 
                 result += tokenId.convert() + f" ({lineIdx}, {start}) " + '"' + findOut + '"' + "\n"
             start += len(find)

@@ -14,8 +14,8 @@ BEGIN
         WRITE(a);
     END;
 
-    str[i] := ddd;
-    str[1] := ddd;
+    st_r[i] := ddd;
+    _str[1] := ddd;
     { HELLO WORLD }
     i123 := isdf;
     asd123 := -123;
@@ -38,3 +38,4 @@ BEGIN
     READ();
     READ(a12);
 END.
+//
