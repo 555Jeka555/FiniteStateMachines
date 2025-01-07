@@ -5,7 +5,6 @@ import RegexToDFA
 
 class TokenType(Enum):
     EMPTY_TOKEN = 0
-    KEY_WORD_TOKEN = 1
     IDENTIFIER_TOKEN = 2
     DOT_TOKEN = 3
     ASSIGN_TOKEN = 4
@@ -36,12 +35,24 @@ class TokenType(Enum):
     NOT_EQ_TOKEN = 30  # <>
     COLON_TOKEN = 31  # :
 
+    PROGRAM_TOKEN = 32
+    VAR_TOKEN = 33
+    BEGIN_TOKEN = 34
+    END_TOKEN = 35
+    OF_TOKEN = 36
+    ARRAY_TOKEN = 37
+    IF_TOKEN = 38
+    OR_TOKEN = 39
+    PROCEDURE_TOKEN = 40
+    THEN_TOKEN = 41
+    ELSE_TOKEN = 42
+    TYPE_KEY_TOKEN = 43
+
+
     def convert(self) -> str:
         match self:
             case TokenType.EMPTY_TOKEN:
                 return "EMPTY"
-            case TokenType.KEY_WORD_TOKEN:
-                return "KEYWORD"
             case TokenType.IDENTIFIER_TOKEN:
                 return "IDENTIFIER"
             case TokenType.DOT_TOKEN:
@@ -98,6 +109,30 @@ class TokenType(Enum):
                 return "NOT EQ"
             case TokenType.COLON_TOKEN:
                 return "COLON"
+            case TokenType.PROGRAM_TOKEN:
+                return "PROGRAM"
+            case TokenType.VAR_TOKEN:
+                return "VAR"
+            case TokenType.BEGIN_TOKEN:
+                return "BEGIN"
+            case TokenType.END_TOKEN:
+                return "END"
+            case TokenType.OF_TOKEN:
+                return "OF"
+            case TokenType.ARRAY_TOKEN:
+                return "ARRAY"
+            case TokenType.IF_TOKEN:
+                return "IF"
+            case TokenType.OR_TOKEN:
+                return "OR"
+            case TokenType.PROCEDURE_TOKEN:
+                return "PROCEDURE"
+            case TokenType.THEN_TOKEN:
+                return "THEN"
+            case TokenType.ELSE_TOKEN:
+                return "ELSE"
+            case TokenType.TYPE_KEY_TOKEN:
+                return "TYPE"
             case _:
                 return "Unknown Token Type"
 

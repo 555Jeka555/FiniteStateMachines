@@ -24,20 +24,19 @@ ALL_SYM = ALL_LET + "|" + ALL_DIGIT
 ALL_SYM_WITH_SPEC = ALL_LET + "|" + ALL_DIGIT + "|" + ALL_SPEC_SYM
 
 tokenIdToRegMap = {
-    TokenType.KEY_WORD_TOKEN: Token(TokenType.KEY_WORD_TOKEN,
-                                    "PROGRAM|"
-                                    "VAR|"
-                                    "BEGIN|"
-                                    "END|"
-                                    "OF|"
-                                    "ARRAY|"
-                                    "IF|"
-                                    "OR|"
-                                    "PROCEDURE|"
-                                    "THEN|"
-                                    "ELSE|"
-                                    "TYPE"
-                                    ),
+    TokenType.PROGRAM_TOKEN: Token(TokenType.PROGRAM_TOKEN, "(P|p)(R|r)(O|o)(G|g)(R|r)(A|a)(M|m)"),
+    TokenType.VAR_TOKEN: Token(TokenType.VAR_TOKEN, "(V|v)(A|a)(R|r)"),
+    TokenType.BEGIN_TOKEN: Token(TokenType.BEGIN_TOKEN, "(B|b)(E|e)(G|g)(I|i)(N|n)"),
+    TokenType.END_TOKEN: Token(TokenType.END_TOKEN, "(E|e)(N|n)(D|d)"),
+    TokenType.OF_TOKEN: Token(TokenType.OF_TOKEN, "(O|o)(F|f)"),
+    TokenType.ARRAY_TOKEN: Token(TokenType.ARRAY_TOKEN, "(A|a)(R|r)(R|r)(A|a)(Y|y)"),
+    TokenType.IF_TOKEN: Token(TokenType.IF_TOKEN, "(I|i)(F|f)"),
+    TokenType.OR_TOKEN: Token(TokenType.OR_TOKEN, "(O|o)(R|r)"),
+    TokenType.PROCEDURE_TOKEN: Token(TokenType.PROCEDURE_TOKEN, "(P|p)(R|r)(O|o)(C|c)(E|e)(D|d)(U|u)(R|r)(E|e)"),
+    TokenType.THEN_TOKEN: Token(TokenType.THEN_TOKEN, "(T|t)(H|h)(E|e)(N|n)"),
+    TokenType.ELSE_TOKEN: Token(TokenType.ELSE_TOKEN, "(E|e)(L|l)(S|s)(E|e)"),
+    TokenType.TYPE_KEY_TOKEN: Token(TokenType.TYPE_TOKEN, "(T|t)(Y|y)(P|p)(E|e)"),
+
     TokenType.FUNC_TOKEN: Token(TokenType.FUNC_TOKEN, "WRITE|READ|WRITELN|READLN"),
     TokenType.TYPE_TOKEN: Token(TokenType.TYPE_TOKEN, "BOOLEAN|STRING|TEXT|FLOAT|INTEGER"),
     TokenType.LITERAL_TOKEN: Token(TokenType.LITERAL_TOKEN, "'" + "(" + ALL_SYM + ")" + "*" + "'"),
@@ -76,18 +75,18 @@ SpacesToken = EmptyToken("( )*")
 LeftRoundBracketToken = EmptyToken(LEFT_PAREN_BRACKET)
 RightRoundBracketToken = EmptyToken(RIGHT_ROUND_BRACKET)
 
-ProgramToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "PROGRAM")
-VarToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "VAR")
-BeginToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "BEGIN")
-ArrayTypeToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "ARRAY")
-EndToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "END")
-OfToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "OF")
-ElseToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "ELSE")
-IfToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "IF")
-OrToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "OR")
-ProcedureToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "PROCEDURE")
-ThenToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "THEN")
-TypeKeyToken = ConcreteToken(tokenIdToRegMap[TokenType.KEY_WORD_TOKEN], "TYPE")
+ProgramToken = ConcreteToken(tokenIdToRegMap[TokenType.PROGRAM_TOKEN], "PROGRAM")
+VarToken = ConcreteToken(tokenIdToRegMap[TokenType.VAR_TOKEN], "VAR")
+BeginToken = ConcreteToken(tokenIdToRegMap[TokenType.BEGIN_TOKEN], "BEGIN")
+EndToken = ConcreteToken(tokenIdToRegMap[TokenType.END_TOKEN], "END")
+OfToken = ConcreteToken(tokenIdToRegMap[TokenType.OF_TOKEN], "OF")
+ArrayTypeToken = ConcreteToken(tokenIdToRegMap[TokenType.ARRAY_TOKEN], "ARRAY")
+ElseToken = ConcreteToken(tokenIdToRegMap[TokenType.ELSE_TOKEN], "ELSE")
+IfToken = ConcreteToken(tokenIdToRegMap[TokenType.IF_TOKEN], "IF")
+OrToken = ConcreteToken(tokenIdToRegMap[TokenType.OR_TOKEN], "OR")
+ProcedureToken = ConcreteToken(tokenIdToRegMap[TokenType.PROCEDURE_TOKEN], "PROCEDURE")
+ThenToken = ConcreteToken(tokenIdToRegMap[TokenType.THEN_TOKEN], "THEN")
+TypeKeyToken = ConcreteToken(tokenIdToRegMap[TokenType.TYPE_KEY_TOKEN], "TYPE")
 
 TypeToken = tokenIdToRegMap[TokenType.TYPE_TOKEN]
 
