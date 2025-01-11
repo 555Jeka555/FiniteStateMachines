@@ -1,42 +1,10 @@
-PrOGRAM example;
-TYPE
-VAR
-    x: INTEGER;
-    str: ArrAY[1..1] of INTEGER;
-BEGIN
-    PROCEDURE calculateSum(VAR arr: INTEGER);
-    PROceDURE calculateSum(arr: INTEGER);
-    IF a > b THEN
-    BEGIN
-         WRITE('12');
-    END
-    ELSE
-    BEGIN
-        WRITE(a);
-    END;
-
-    st_r[i] := ddd;
-    _str[1] := ddd;
-    { HELLO WORLD }
-    i123 := isdf;
-    asd123 := -123;
-    asd123 := 123;
-    asd123 := -123.2;
-    asd123 := 23.2;
-    // ffff
-
-    a := 12.3;
-
-    WRITE('12');
-    WRITE(a12);
-    READ;
-    READ();
-    READ(a12);
-    WRITELN;
-    WRITELN('12');
-    WRITELN(a12);
-    READLN;
-    READ();
-    READ(a12);
-END.
-//
+program example;
+var
+  x: integer;
+ str: array[1..10] of integer;
+begin
+  // Initialize x
+  x := 42;
+  {This is a block comment}
+  str[1] := x + 3.14
+end.

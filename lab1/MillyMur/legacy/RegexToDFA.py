@@ -22,15 +22,15 @@ class RegToDKAConverter:
     def convert(self, expression: str) -> Slider.Slider:
         self.expression = expression
         try:
-            os.remove("./data/Lexer/nfa.csv")
-            os.remove("./data/Lexer/dfa.csv")
+            os.remove("../data/Lexer/nfa.csv")
+            os.remove("../data/Lexer/dfa.csv")
         except OSError as e:
             print(f"Error deleting files: {e}")
 
         regexToNFACovnerter = RegexToNFA.RegexToNFA(expression)
         regexToNFACovnerter.writeToCsvFile("./data/Lexer/nfa.csv")
         NFAToDFA.determineNFA("./data/Lexer/nfa.csv", "./data/Lexer/dfa.csv")
-        return self.readDKAFromCSV("./data/Lexer/dfa.csv")
+        return self.readDKAFromCSV("../data/Lexer/dfa.csv")
 
     def readDKAFromCSV(self, path: str) -> Slider.Slider:
         data = readDataFromCsv(path)
