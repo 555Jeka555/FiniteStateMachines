@@ -1,9 +1,12 @@
-import Reader
-import Expressions
-import TokenType
-import sys
+import lexer
+import tokensdata
+from typing import TextIO, Callable
+
+def getDataGetter(f: TextIO) ->Callable[[], str]:
+    return lambda: f.readline()
 
 if __name__ == "__main__":
+    import sys
 
     if len(sys.argv) not in {3, 4}:
         print("main.py <inFile> <outFile>")
@@ -16,15 +19,8 @@ if __name__ == "__main__":
         inFile = sys.argv[2]
         outFile = sys.argv[3]
 
-    reader = Reader.Reader(Expressions.expressions, outFile)
-
-    with open('./data/Lexer/in.txt', 'r', encoding='utf-8') as f:
-        data = f.read()
-
-        data = data.replace(";", TokenType.SEMICOLON)
-        data = data.replace("(", TokenType.LEFT_PAREN_BRACKET)
-        data = data.replace(")", TokenType.RIGHT_ROUND_BRACKET)
-        data = data.replace("+", TokenType.PLUS)
-        data = data.replace("*", TokenType.MULT)
-
-        reader.handle(data)
+    with open(inFile, 'r', encoding='utf-8') as f:
+        lexer = lexer.Lexer(tokensdata.token_types, getDataGetter(f))
+        while (token := lexer.nextToken()) is not None:
+            if token.type != "SPACE":
+                print(token)
