@@ -1,9 +1,11 @@
-import lexer
-import tokensdata
+import Lexer
+import TokensType
 from typing import TextIO, Callable
 
-def getDataGetter(f: TextIO) ->Callable[[], str]:
+
+def getDataGetter(f: TextIO) -> Callable[[], str]:
     return lambda: f.readline()
+
 
 if __name__ == "__main__":
     import sys
@@ -20,7 +22,8 @@ if __name__ == "__main__":
         outFile = sys.argv[3]
 
     with open(inFile, 'r', encoding='utf-8') as f:
-        lexer = lexer.Lexer(tokensdata.token_types, getDataGetter(f))
+        lexer = Lexer.Lexer(TokensType.tokens, getDataGetter(f))
         while (token := lexer.nextToken()) is not None:
             if token.type != "SPACE":
                 print(token)
+

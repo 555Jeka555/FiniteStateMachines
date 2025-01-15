@@ -151,7 +151,7 @@ class Token(IRegular):
     def __init__(self, id: TokenType, reg: str):
         self.id = id
         self.reg = reg
-        self.slider = RegexToDFA.RegToDKAConverter().convert(reg)
+        self.slider = RegexToDFA.RegToDFAConverter().convert(reg)
 
     def handle(self, string: str, start: int) -> [TokenType, str, int | None]:
         i = start

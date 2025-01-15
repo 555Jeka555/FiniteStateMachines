@@ -1,5 +1,5 @@
 from __future__ import annotations
-import regtodka
+import RegexToDFA
 from enum import Enum
 
 
@@ -8,11 +8,12 @@ class TokenProcessResult(Enum):
     SUCCESS = 2
     FAILED = 3
 
+
 class Token:
     def __init__(self, id: str, reg: str):
         self.id = id
         self.reg = reg
-        self.slider = regtodka.RegToDKAConverter().convert(reg)
+        self.slider = RegexToDFA.RegToDFAConverter().convert(reg)
 
     def nextChar(self, c: str) -> TokenProcessResult:
         status = TokenProcessResult.SUCCESS

@@ -15,7 +15,7 @@ def readDataFromCsv(fileName) -> list[str]:
             data.append(row)
     return data
 
-class RegToDKAConverter:
+class RegToDFAConverter:
     def __init__(self):
         pass
 

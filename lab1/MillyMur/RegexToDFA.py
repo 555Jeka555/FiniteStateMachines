@@ -1,26 +1,27 @@
-import regtonka
-import nkatodka
-import mindka
-import slider
-
+import RegexToNFA
+import NFAToDFA
+import MinimizeDFA
+import Slider
 from typing import List
 
-class RegToDKAConverter:
+
+class RegToDFAConverter:
     def __init__(self):
         pass
-    def convert(self, expression: str) -> slider.Slider:
-        nfa = regtonka.process_regex(expression)
-        dfa = nkatodka.process_nfa(*nfa)
-        states, input_symbols, transitions, outputs, initial_state = mindka.process_dfa(*dfa)
+    
+    def convert(self, expression: str) -> Slider.Slider:
+        nfa = RegexToNFA.processRegex(expression)
+        dfa = NFAToDFA.processNFA(*nfa)
+        states, input_symbols, transitions, outputs, initial_state = MinimizeDFA.processDFA(*dfa)
 
-        sliderStates: List[slider.State] = [slider.State(initial_state)]
+        sliderStates: List[Slider.State] = [Slider.State(initial_state)]
         finishStates = []
 
         for state in states:
             if outputs[state] == "F":
                 finishStates.append(state)
             if state != initial_state:
-                sliderState = slider.State(state)
+                sliderState = Slider.State(state)
                 sliderStates.append(sliderState)
             else:
                 sliderState = sliderStates[0]
@@ -31,4 +32,4 @@ class RegToDKAConverter:
                 if transaction:
                     sliderState.AddTransition(input_symbol, transaction)
 
-        return slider.Slider(sliderStates, finishStates)
+        return Slider.Slider(sliderStates, finishStates)

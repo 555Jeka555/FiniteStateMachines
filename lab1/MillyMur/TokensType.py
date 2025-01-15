@@ -1,14 +1,14 @@
-from tokens import *
+from Tokens import *
 
-LETTER_LOWER = '(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z)'
-LETTER_UPPER = '(A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)'
-LETTER = f'({LETTER_LOWER}|{LETTER_UPPER})'
+ALF_LOWER = '(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z)'
+ALF_UPPER = '(A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)'
+ALF = f'({ALF_LOWER}|{ALF_UPPER})'
 DIGIT_NO_ZERO = '(1|2|3|4|5|6|7|8|9)'
 DIGIT = f'(0|{DIGIT_NO_ZERO})'
-SYMBOL = f'({DIGIT}|{LETTER})'
+SYMBOL = f'({DIGIT}|{ALF})'
 NUMBER = f'({DIGIT}|{DIGIT_NO_ZERO}{DIGIT}*)'
 
-token_types = [
+tokens = [
     Token('BLOCK_COMMENT', f'{{({SYMBOL}| )*}}'),
     Token('LINE_COMMENT', f'//({SYMBOL}| )*'),
     Token('ARRAY', '(A|a)(R|r)(R|r)(A|a)(Y|y)'),
@@ -42,7 +42,7 @@ token_types = [
     Token('ASSIGN', ':='),
     Token('COLON', ':'),
     Token('DOT', '.'),
-    Token('IDENTIFIER', f'({LETTER}|_)({SYMBOL}|_)*'),
+    Token('IDENTIFIER', f'({ALF}|_)({SYMBOL}|_)*'),
     Token('STRING', f'\'{SYMBOL}*\''),
     Token('FLOAT', f'(ε|-){NUMBER}.{DIGIT}+'),
     Token('INTEGER', f'(ε|-){NUMBER}'),
