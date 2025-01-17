@@ -1,5 +1,7 @@
 import csv
 import argparse
+from pyvis.network import Network
+
 
 NEW_STATE_NAME = 'q'
 DEFAULT_MIN_STATE_NAME = 'X'
@@ -291,6 +293,22 @@ def minimizeMoore(inputFileName, outputFileName):
     printFormattedDict(data)
     writeToCsv(outputFileName, data)
 
+def drawGraph(states, input_to_transitions, is_mealy=True):
+    net = Network(notebook=True, directed=True)
+    # Добавляем узлы (состояния)
+    for state in states:
+        net.add_node(state, label=state)
+    # Добавляем ребра (переходы)
+    for input_value, transitions in input_to_transitions.items():
+        for from_state, to_state_output in transitions.items():
+            to_state, output = to_state_output.split(STATE_OUTPUT_SEPARATOR)
+            if is_mealy:
+                label = f"{input_value}/{output}"
+            else:
+                label = input_value
+            net.add_edge(from_state, to_state, label=label)
+    # Отображаем граф
+    net.show("graph.html")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some CSV files.')
@@ -306,7 +324,11 @@ if __name__ == '__main__':
         mooreToMealy(args.inputFileName, args.outputFileName)
     elif args.command == MINIMIZE_MEALY:
         minimizeMealy(args.inputFileName, args.outputFileName)
+        mealy_states, mealyStateOutputs, input_to_transitions = readMealyFromCsv(args.outputFileName)
+        drawGraph(mealy_states, input_to_transitions, is_mealy=True)
     elif args.command == MINIMIZE_MOORE:
         minimizeMoore(args.inputFileName, args.outputFileName)
+        moore_states, input_to_transitions = readMooreFromCsv(args.inputFileName)
+        drawGraph(moore_states, input_to_transitions, is_mealy=False)
     else:
         print('Not found')
