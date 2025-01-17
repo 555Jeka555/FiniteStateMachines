@@ -7,8 +7,11 @@ DIGIT_NO_ZERO = '(1|2|3|4|5|6|7|8|9)'
 DIGIT = f'(0|{DIGIT_NO_ZERO})'
 SYMBOL = f'({DIGIT}|{ALF})'
 NUMBER = f'({DIGIT}|{DIGIT_NO_ZERO}{DIGIT}*)'
+E_POS = f'(e{DIGIT}+)|(e+{DIGIT}+)'
+E_NEG = f'(e-{DIGIT}+)'
 
 tokens = [
+    Token('SPACE', f' |\n|\t|\r'),
     Token('BLOCK_COMMENT', f'{{({SYMBOL}| )*}}'),
     Token('LINE_COMMENT', f'//({SYMBOL}| )*'),
     Token('ARRAY', '(A|a)(R|r)(R|r)(A|a)(Y|y)'),
@@ -34,18 +37,18 @@ tokens = [
     Token('LEFT_BRACKET', '['),
     Token('RIGHT_BRACKET', ']'),
     Token('EQ', '='),
+    Token('NOT_EQ', '<>'),
     Token('GREATER', '>'),
     Token('LESS', '<'),
     Token('LESS_EQ', '<='),
     Token('GREATER_EQ', '>='),
-    Token('NOT_EQ', '<>'),
     Token('ASSIGN', ':='),
     Token('COLON', ':'),
     Token('DOT', '.'),
-    Token('IDENTIFIER', f'({ALF}|_)({SYMBOL}|_)*'),
+    Token('IDENTIFIER', f'({ALF}|_)({SYMBOL}|_)*', maxLength=256),
     Token('STRING', f'\'{SYMBOL}*\''),
-    Token('FLOAT', f'(ε|-){NUMBER}.{DIGIT}+'),
-    Token('INTEGER', f'(ε|-){NUMBER}'),
-    Token('SPACE', f' |\n|\t|\r'),
+    Token('FLOAT', f'((ε|-){NUMBER}.{DIGIT}+({E_POS}|{E_NEG}|ε))|((ε|-){NUMBER}({E_NEG}))'),
+    Token('INTEGER', f'(ε|-){NUMBER}({E_POS}|ε)', maxLength=16),
     Token('BAD', f'{SYMBOL}'),
 ]
+

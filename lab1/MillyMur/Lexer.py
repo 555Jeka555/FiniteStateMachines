@@ -20,6 +20,7 @@ class Lexer:
         self.column = 1
         self.buffer = valueGetter()
         self.valueGetter = valueGetter
+        self.statistics = dict()
 
     def nextToken(self) -> LexerToken | None:
         if not self.buffer and not self.appendNewBuffer():
@@ -52,7 +53,15 @@ class Lexer:
                         self.column = 1
                         self.line += 1
 
-                    return LexerToken(token.id, resultValue, startPosition)
+                    if token.id == 'BLOCK_COMMENT' or token.id == 'LINE_COMMENT':
+                        token.reset()
+                        bufferIndex = 0
+                        continue
+
+                    lexerToken = LexerToken(token.id, resultValue, startPosition)
+                    self.appendIntoStatistics(lexerToken)
+
+                    return lexerToken
 
                 if charResult == TokenProcessResult.FAILED:
                     break
@@ -63,6 +72,33 @@ class Lexer:
         tmp = self.buffer
         self.buffer = self.buffer[1:]
         return LexerToken("BAD", tmp[0], (self.line, self.column))
+
+    def appendIntoStatistics(self, lexerToken: LexerToken):
+        if lexerToken.value not in self.statistics.keys():
+            l = []
+            l.append(lexerToken)
+            self.statistics[lexerToken.value] = l
+        else:
+            self.statistics[lexerToken.value].append(lexerToken)
+
+    def printStatistics(self):
+        print()
+        print("STATISTICS")
+
+        print("VALUE".ljust(30) + "TYPE".ljust(15) + "COUNT".ljust(15) + "POSITIONS")
+        print("-" * 75)
+
+        for resultValue, lexerTokens in self.statistics.items():
+            value = (resultValue if resultValue else "<EMPTY>").ljust(30)
+            token_type = lexerTokens[0].type.ljust(15)
+            count = str(len(lexerTokens)).ljust(15)
+            positions = []
+
+            for lexerToken in lexerTokens:
+                position_str = ",".join(map(str, lexerToken.position))
+                positions.append(position_str)
+
+            print(f"{value}{token_type}{count}{'; '.join(positions)}")
 
     def appendNewBuffer(self) -> bool:
         newData = self.valueGetter()
