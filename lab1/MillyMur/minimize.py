@@ -1,78 +1,61 @@
 import csv
-import argparse
-from pyvis.network import Network
+import sys
 
 
-NEW_STATE_NAME = 'q'
-DEFAULT_MIN_STATE_NAME = 'X'
-STATE_OUTPUT_SEPARATOR = '/'
-STATE_INPUT_SEPARATOR = '/'
-DEFAULT_GROUP_PREFIX = "_ "
-CONVERT_TYPE_MEALY_TO_MOORE = 'mealy-to-moore'
-CONVERT_TYPE_MOORE_TO_MEALY = 'moore-to-mealy'
-MINIMIZE_MEALY = 'mealy'
-MINIMIZE_MOORE = 'moore'
+def read_moore_machine(file_name):
+    states = []
+    input_symbols = []
+    transitions = {}
+    outputs = {}
+    initial_state = None
+
+    with open(file_name, 'r', newline="", encoding="utf-8") as f:
+        reader = csv.reader(f, delimiter=";")
+        outputs_row = list(reversed(next(reader)[1:]))
+        states = next(reader)[1:]
+        initial_state = states[0]
+        for state in states:
+            outputs[state] = outputs_row.pop()
+        for row in reader:
+            symbol = row[0]
+            input_symbols.append(symbol)
+            for index in range(len(row) - 1):
+                transitions.setdefault(states[index], {})[symbol] = row[index + 1]
+
+    return states, input_symbols, transitions, outputs, initial_state
 
 
-def printFormattedDict(data):
-    for row in data:
-        formattedRow = " ".join(f"{item:<7}" for item in row)
-        print(formattedRow)
-    print()
+def readMealyMachine(file_name):
+    states = []
+    input_symbols = []
+    transitions = {}
+    outputs = {}
+    initial_state = None
 
+    with open(file_name, 'r', newline="", encoding="utf-8") as f:
+        reader = csv.reader(f, delimiter=";")
+        states = next(reader)[1:]
+        initial_state = states[0]
+        for row in reader:
+            symbol = row[0]
+            input_symbols.append(symbol)
+            for index in range(len(row) - 1):
+                if "/" in row[index + 1]:
+                    state, output = row[index + 1].split('/')
+                    transitions.setdefault(states[index], {})[symbol] = state
+                    outputs.setdefault(states[index], {})[symbol] = output
+                else:
+                    transitions.setdefault(states[index], {})[symbol] = ""
+                    outputs.setdefault(states[index], {})[symbol] = ""
+    return states, input_symbols, transitions, outputs, initial_state
 
-def writeToCsv(fileName, data, delimiter=';'):
-    with open(fileName, 'w', newline='', encoding='ISO-8859-1') as file:
-        writer = csv.writer(file, delimiter=delimiter)
-        writer.writerows(data)
-
-
-def readMealyFromCsv(fileName, delimiter=';'):
+def readMooreFromCSV(fileName, delimiter=';'):
     with open(fileName, 'r', encoding='ISO-8859-1') as file:
         reader = csv.reader(file, delimiter=delimiter)
         data = []
 
         for row in reader:
             data.append(row)
-
-        printFormattedDict(data)
-
-        mealyStates = []
-        for index, state in enumerate(data[0]):
-            if index == 0:
-                continue
-            mealyStates.append(state.strip())
-
-        mealyStateOutputs = {}
-        inputValueToTransitions = {}
-
-        for index, transitions in enumerate(data[1:]):
-            inputValue = transitions[0].strip()
-
-            for index2, transition in enumerate(transitions[1:]):
-                state, output = transition.strip().split(STATE_OUTPUT_SEPARATOR)
-
-                if state not in mealyStateOutputs:
-                    mealyStateOutputs[state] = set()
-                mealyStateOutputs[state].add(output.strip())
-
-                if inputValue not in inputValueToTransitions:
-                    inputValueToTransitions[inputValue] = {}
-
-                inputValueToTransitions[inputValue][mealyStates[index2]] = f"{state}{STATE_OUTPUT_SEPARATOR}{output}"
-
-        return mealyStates, mealyStateOutputs, inputValueToTransitions
-
-
-def readMooreFromCsv(fileName, delimiter=';'):
-    with open(fileName, 'r', encoding='ISO-8859-1') as file:
-        reader = csv.reader(file, delimiter=delimiter)
-        data = []
-
-        for row in reader:
-            data.append(row)
-
-        printFormattedDict(data)
 
         mooreStates = []
         mooreStateOutputs = {}
@@ -96,239 +79,199 @@ def readMooreFromCsv(fileName, delimiter=';'):
                 if inputValue not in inputValueToTransitions:
                     inputValueToTransitions[inputValue] = {}
 
-                inputValueToTransitions[inputValue][currentState] = f"{nextState}{STATE_OUTPUT_SEPARATOR}{output}"
+                inputValueToTransitions[inputValue][currentState] = f"{nextState}/{output}"
 
     return mooreStates, inputValueToTransitions
 
-
-def mealyToMoore(inputFileName, outputFileName):
-    mealyStates, mealyStateOutputs, inputValueToTransitions = readMealyFromCsv(inputFileName)
-    mealyToMooreStates = {}
-
-    mealyStateOutputs = dict(
-        sorted(mealyStateOutputs.items(),
-               key=lambda item: mealyStates.index(item[0]) if item[0] in mealyStates else float('inf')))
-    for mealyState, output in mealyStateOutputs.items():
-        mealyStateOutputs[mealyState] = sorted(output)
-
-    for mealyState in mealyStates:
-        if mealyState in mealyStateOutputs:
-            for output in mealyStateOutputs[mealyState]:
-                transition = mealyState + STATE_OUTPUT_SEPARATOR + output
-                mealyToMooreStates[transition] = NEW_STATE_NAME + str(len(mealyToMooreStates))
-        else:
-            mealyToMooreStates[mealyState] = NEW_STATE_NAME + str(len(mealyToMooreStates))
-
-    outputsRow = ['']
-    statesRow = ['']
-    for mealyState in mealyStates:
-        if mealyState in mealyStateOutputs:
-            for output in mealyStateOutputs[mealyState]:
-                outputsRow.append(output)
-                statesRow.append(mealyToMooreStates[mealyState + STATE_OUTPUT_SEPARATOR + output])
-        else:
-            outputsRow.append('')
-            statesRow.append(mealyToMooreStates[mealyState])
-
-    transitionsRows = []
-    for inputValue, transitions in inputValueToTransitions.items():
-        row = [inputValue]
-
-        for currentState in transitions:
-            nextState = inputValueToTransitions[inputValue][currentState]
-
-            countOutputs = len(mealyStateOutputs.get(currentState, [1]))
-            for i in range(countOutputs):
-                row.append(mealyToMooreStates[nextState])
-
-        transitionsRows.append(row)
-
-    data = [outputsRow, statesRow]
-    for transitionRow in transitionsRows:
-        data.append(transitionRow)
-
-    printFormattedDict(data)
-    writeToCsv(outputFileName, data)
+def write_mealy_machine(file_name, states, input_symbols, transitions, outputs, initial_state):
+    states = [initial_state] + list(filter(lambda x: x != initial_state, states))
+    with open(file_name, 'w', newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, delimiter=";")
+        writer.writerow([""] + states)
+        for symbol in input_symbols:
+            row = [symbol]
+            for state in states:
+                transition = transitions[state][symbol]
+                output = outputs[state][symbol]
+                if transition and output:
+                    row.append(f"{transition}/{output}")
+                else:
+                    row.append("")
+            writer.writerow(row)
 
 
-def mooreToMealy(inputFileName, outputFileName):
-    mooreStateOutputs, inputValueToTransitions = readMooreFromCsv(inputFileName)
-
-    statesRow = ['']
-    for mooreState in mooreStateOutputs.keys():
-        statesRow.append(mooreState)
-
-    transitionsRows = []
-    for inputValue, transitions in inputValueToTransitions.items():
-        row = [inputValue]
-
-        for currentState in transitions:
-            nextState = inputValueToTransitions[inputValue][currentState]
-            row.append(nextState)
-
-        transitionsRows.append(row)
-
-    data = [statesRow]
-    for transitionRow in transitionsRows:
-        data.append(transitionRow)
-
-    printFormattedDict(data)
-    writeToCsv(outputFileName, data)
-
-
-def splitStatesInGroup(states, inputValueToTransitions, prevStateToGroup=None):
-    groups = {}
-    groupOutputs = {}
-    stateToGroup = {}
-
-    def splitStates(state, groupPrefix=DEFAULT_GROUP_PREFIX):
-        groupInputs = [groupPrefix]
-        outputs = []
-        for inputValue in inputValueToTransitions:
-            if prevStateToGroup is None:
-                groupInput = inputValueToTransitions[inputValue][state].split(STATE_INPUT_SEPARATOR)[1]
-                groupInputs.append(groupInput)
-                continue
-
-            groupInput = inputValueToTransitions[inputValue][state].split(STATE_INPUT_SEPARATOR)[0]
-            outputs.append(inputValueToTransitions[inputValue][state].split(STATE_INPUT_SEPARATOR)[1])
-
-            groupName = prevStateToGroup[groupInput]
-            groupInput = list(dict.fromkeys(prevStateToGroup.values())).index(groupName)
-            groupInputs.append(str(groupInput))
-
-        groupInputsStr = ' '.join(groupInputs)
-
-        if groupInputsStr not in groups.keys():
-            groups[groupInputsStr] = []
-        groups[groupInputsStr].append(state)
-        groupOutputs[groupInputsStr] = outputs
-        stateToGroup[state] = groupInputsStr
-
-    if isinstance(states, list):
+def writeMoore(file_name, states, input_symbols, transitions, outputs, initial_state):
+    states = [initial_state] + list(filter(lambda x: x != initial_state, states))
+    with open(file_name, 'w', newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, delimiter=";")
+        outputs_row = [""]
         for state in states:
-            splitStates(state)
-    else:
-        for i, group in enumerate(states, start=1):
-            for state in states[group]:
-                splitStates(state, f'\{i}')
+            outputs_row.append(outputs[state])
+        writer.writerow(outputs_row)
+        writer.writerow([""] + states)
+        for symbol in input_symbols:
+            row = [symbol]
+            for state in states:
+                row.append(transitions[state][symbol])
+            writer.writerow(row)
 
-    return groups, groupOutputs, stateToGroup
+
+def removeUnreachableStates(states, input_symbols, transitions, outputs, initial_state):
+    reachable_states = set()
+    to_visit = [initial_state]
+
+    while to_visit:
+        state = to_visit.pop()
+        if state in reachable_states:
+            continue
+        reachable_states.add(state)
+
+        for symbol in transitions[state]:
+            transition = transitions[state][symbol]
+            if transition:
+                to_visit.append(transition)
+
+    return list(filter(lambda x: x in reachable_states, states)), input_symbols, transitions, outputs, initial_state
 
 
-def groupStatesToInputs(states, inputValueToTransitions):
-    groups, _, stateToGroup = splitStatesInGroup(states, inputValueToTransitions)
+def minimize_mealy_machine(states, input_symbols, transitions, outputs, initial_state):
+    output_groups = {}
+    for state in states:
+        output = ""
+        for symbol in input_symbols:
+            output += outputs[state][symbol]
+        output_groups.setdefault(output, set()).add(state)
 
-    groups, _, stateToGroup = splitStatesInGroup(groups, inputValueToTransitions, stateToGroup)
+    partitions = list(output_groups.values())
+
+    def refine(partitions):
+        new_partitions = []
+        for group in partitions:
+            subgroup = {}
+            for state in group:
+                key = ""
+                for symbol in input_symbols:
+                    key += str(next((i for i, s in enumerate(partitions) if transitions[state][symbol] in s)))
+                subgroup.setdefault(key, set()).add(state)
+            new_partitions.extend(subgroup.values())
+        return new_partitions
 
     while True:
-        newGroups, groupOutputs, stateToGroup = splitStatesInGroup(groups, inputValueToTransitions, stateToGroup)
-        isEqual = str(newGroups) == str(groups)
-        groups = newGroups
-
-        if isEqual:
+        new_partitions = refine(partitions)
+        if new_partitions == partitions:
             break
+        partitions = new_partitions
 
-    return groups, groupOutputs
+    state_map = {}
+    minimized_states = []
+    minimized_transitions = {}
+    minimized_outputs = {}
 
+    for i, group in enumerate(partitions):
+        new_state = f"S{i}"
+        for state in group:
+            state_map[state] = new_state
+        minimized_states.append(new_state)
 
-def minimizeMealy(inputFileName, outputFileName):
-    mealyStates, _, inputValueToTransitions = readMealyFromCsv(inputFileName)
-    groups, groupOutputs = groupStatesToInputs(mealyStates, inputValueToTransitions)
+    for group in partitions:
+        representative = next(iter(group))
+        new_state = state_map[representative]
+        minimized_transitions[new_state] = {
+            symbol: state_map[transitions[representative][symbol]]
+            for symbol in input_symbols
+        }
+        minimized_outputs[new_state] = {
+            symbol: outputs[representative][symbol]
+            for symbol in input_symbols
+        }
 
-    statesRow = ['']
-    for i in range(len(groups)):
-        state = DEFAULT_MIN_STATE_NAME + str(i)
-        statesRow.append(state)
+    minimized_initial_state = state_map[initial_state]
 
-    transitionsRows = []
-    for i, inputValue in enumerate(inputValueToTransitions):
-        row = [inputValue]
-
-        for group in groups:
-            groupStates = group.split(' ')[1:]
-            state = DEFAULT_MIN_STATE_NAME + str(groupStates[i])
-            output = groupOutputs[group][i]
-            transition = state + STATE_INPUT_SEPARATOR + output
-            row.append(transition)
-
-        transitionsRows.append(row)
-
-    data = [statesRow]
-    for transitionRow in transitionsRows:
-        data.append(transitionRow)
-
-    printFormattedDict(data)
-
-    writeToCsv(outputFileName, data)
+    return minimized_states, input_symbols, minimized_transitions, minimized_outputs, minimized_initial_state
 
 
-def minimizeMoore(inputFileName, outputFileName):
-    mooreStates, inputValueToTransitions = readMooreFromCsv(inputFileName)
-    groups, groupOutputs = groupStatesToInputs(mooreStates, inputValueToTransitions)
-
-    outputsRow = ['']
-    statesRow = ['']
-    for i in range(len(groups)):
-        state = DEFAULT_MIN_STATE_NAME + str(i)
-        statesRow.append(state)
-
-        output = groupOutputs[list(groups.keys())[i]][0]
-        outputsRow.append(output)
-
-    transitionsRows = []
-    for i, inputValue in enumerate(inputValueToTransitions):
-        row = [inputValue]
-        for group in groups:
-            groupStates = group.split(' ')[1:]
-            state = DEFAULT_MIN_STATE_NAME + str(groupStates[i])
-            row.append(state)
-
-        transitionsRows.append(row)
-
-    data = [outputsRow, statesRow]
-    for transitionRow in transitionsRows:
-        data.append(transitionRow)
-
-    printFormattedDict(data)
-    writeToCsv(outputFileName, data)
-
-def drawGraph(states, input_to_transitions, is_mealy=True):
-    net = Network(notebook=True, directed=True)
-    # Добавляем узлы (состояния)
+def removeUnreachableStates(states, input_symbols, transitions, outputs, initial_state):
+    output_groups = {}
     for state in states:
-        net.add_node(state, label=state)
-    # Добавляем ребра (переходы)
-    for input_value, transitions in input_to_transitions.items():
-        for from_state, to_state_output in transitions.items():
-            to_state, output = to_state_output.split(STATE_OUTPUT_SEPARATOR)
-            if is_mealy:
-                label = f"{input_value}/{output}"
-            else:
-                label = input_value
-            net.add_edge(from_state, to_state, label=label)
-    # Отображаем граф
-    net.show("graph.html")
+        output = outputs[state]
+        output_groups.setdefault(output, set()).add(state)
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Process some CSV files.')
-    parser.add_argument('command', type=str, help='Input CSV file for Mealy')
-    parser.add_argument('inputFileName', type=str, help='Input CSV file')
-    parser.add_argument('outputFileName', type=str, help='Output CSV file')
+    partitions = list(output_groups.values())
 
-    args = parser.parse_args()
+    def refine(partitions):
+        new_partitions = []
+        for group in partitions:
+            subgroup = {}
+            for state in group:
+                key = ""
+                for symbol in input_symbols:
+                    for i, s in enumerate(partitions):
+                        if transitions[state][symbol] in s:
+                            key += symbol + str(i)
+                subgroup.setdefault(key, set()).add(state)
+            new_partitions.extend(subgroup.values())
+        return new_partitions
 
-    if args.command == CONVERT_TYPE_MEALY_TO_MOORE:
-        mealyToMoore(args.inputFileName, args.outputFileName)
-    elif args.command == CONVERT_TYPE_MOORE_TO_MEALY:
-        mooreToMealy(args.inputFileName, args.outputFileName)
-    elif args.command == MINIMIZE_MEALY:
-        minimizeMealy(args.inputFileName, args.outputFileName)
-        mealy_states, mealyStateOutputs, input_to_transitions = readMealyFromCsv(args.outputFileName)
-        drawGraph(mealy_states, input_to_transitions, is_mealy=True)
-    elif args.command == MINIMIZE_MOORE:
-        minimizeMoore(args.inputFileName, args.outputFileName)
-        moore_states, input_to_transitions = readMooreFromCsv(args.inputFileName)
-        drawGraph(moore_states, input_to_transitions, is_mealy=False)
-    else:
-        print('Not found')
+    while True:
+        new_partitions = refine(partitions)
+        if new_partitions == partitions:
+            break
+        partitions = new_partitions
+
+    state_map = {}
+    minimized_states = []
+    minimized_transitions = {}
+    minimized_outputs = {}
+
+    for i, group in enumerate(partitions):
+        new_state = f"S{i}"
+        for state in group:
+            state_map[state] = new_state
+        minimized_states.append(new_state)
+        representative = next(iter(group))
+        minimized_outputs[new_state] = outputs[representative]
+
+    for group in partitions:
+        representative = next(iter(group))
+        new_state = state_map[representative]
+        minimized_transitions[new_state] = {
+            symbol: state_map[transitions[representative][symbol]] if transitions[representative][symbol] else ""
+            for symbol in input_symbols
+        }
+    minimized_initial_state = state_map[initial_state]
+
+    return minimized_states, input_symbols, minimized_transitions, minimized_outputs, minimized_initial_state
+
+
+def main():
+    if len(sys.argv) != 4:
+        print(f"Usage: {sys.argv[0]} <machine-type> <input-file> <output-file>")
+        return 1
+
+    machine_type = sys.argv[1]
+    input_file_name = sys.argv[2]
+    output_file_name = sys.argv[3]
+
+    try:
+        if machine_type == "mealy":
+            values = readMealyMachine(input_file_name)
+            values = removeUnreachableStates(*values)
+            values = minimize_mealy_machine(*values)
+            write_mealy_machine(output_file_name, *values)
+        elif machine_type == "moore":
+            values = read_moore_machine(input_file_name)
+            values = removeUnreachableStates(*values)
+            values = removeUnreachableStates(*values)
+            writeMoore(output_file_name, *values)
+        else:
+            print(f"Unknown machine type: {machine_type}")
+            return 1
+    except RuntimeError as e:
+        print(e)
+        return 1
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

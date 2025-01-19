@@ -22,20 +22,20 @@ class MooreState:
 
 class RegexToNFA:
     def __init__(self, regularExpression: str):
-        self.alphabet = {"e"}
+        self.alphabet = {"ε"}
         self.regularExpression = regularExpression
         self.states: List[MooreState] = []
         self.statesMap: Dict[str, int] = {}
         self.transitions: List[MooreTransition] = []
         self.toNfa()
 
-    def addTransitionToNew(self, fromState: int, toState: int, ch: str = "e"):
+    def addTransitionToNew(self, fromState: int, toState: int, ch: str = "ε"):
         fromStateIdx = fromState
         self.states[fromStateIdx].transitions.add(len(self.transitions))
         self.states.append(MooreState(f"S{toState}", "", {len(self.transitions)}))
         self.transitions.append(MooreTransition(fromStateIdx, {toState}, ch))
 
-    def addTransitionTo(self, fromState: int, toState: int, ch: str = "e"):
+    def addTransitionTo(self, fromState: int, toState: int, ch: str = "ε"):
         self.states[fromState].transitions.add(len(self.transitions))
         self.transitions.append(MooreTransition(fromState, {toState}, ch))
 
@@ -54,7 +54,7 @@ class RegexToNFA:
                         t = self.transitions[transition]
                         if t.fromState == self.states.index(state) and t.inSymbol == inSymbol:
                             for toState in t.toStates:
-                                if toState == self.states.index(state) and inSymbol == "e":
+                                if toState == self.states.index(state) and inSymbol == "ε":
                                     continue
                                 emptyTransitionsSet.add(self.states[toState].state)
 
@@ -96,7 +96,7 @@ class RegexToNFA:
         stateIndexToBrackets = deque([set()])
 
         self.states.append(MooreState("S0"))
-        self.transitions.append(MooreTransition(0, {0}, "e"))
+        self.transitions.append(MooreTransition(0, {0}, "ε"))
 
         closeBracket = False
         openBracket = False
@@ -113,8 +113,8 @@ class RegexToNFA:
             elif c == "(":
                 stateCounter += 1
                 self.states.append(MooreState(f"S{stateCounter}"))
-                self.addTransitionTo(stateCounter, stateCounter, "e")
-                self.addTransitionTo(stateIndex, stateCounter, "e")
+                self.addTransitionTo(stateCounter, stateCounter, "ε")
+                self.addTransitionTo(stateIndex, stateCounter, "ε")
                 stateIndex = stateCounter
                 stateIndexToBrackets.append(set())
                 preBracketStateIndex.append(stateCounter)
@@ -124,7 +124,7 @@ class RegexToNFA:
             elif c == ")":
                 stateCounter += 1
                 if openBracket:
-                    self.addTransitionToNew(stateIndex, stateCounter, "e")
+                    self.addTransitionToNew(stateIndex, stateCounter, "ε")
                     stateIndex = stateCounter
                     preBracketStateIndex.pop()
                     stateIndexToBrackets.pop()
@@ -133,50 +133,50 @@ class RegexToNFA:
                         preBracketStateIndex.pop()
 
                     self.states.append(MooreState(f"S{stateCounter}"))
-                    self.addTransitionTo(stateIndex, stateCounter, "e")
+                    self.addTransitionTo(stateIndex, stateCounter, "ε")
                     if stateIndexToBrackets[-1]:
                         for stateInd in stateIndexToBrackets[-1]:
-                            self.addTransitionTo(stateInd, stateCounter, "e")
+                            self.addTransitionTo(stateInd, stateCounter, "ε")
                     stateIndexToBrackets.pop()
                     stateIndex = stateCounter
                     closeBracket = True
                 openBracket = False
-            elif c == "+":
-                stateCounter += 1
-                if closeBracket:
-                    self.addTransitionToNew(stateIndex, stateCounter, "e")
-                    transition = self.transitions[
-                        next(iter(self.states[preBracketStateIndex[-1]].transitions))
-                    ]
-                    self.addTransitionTo(stateCounter, preBracketStateIndex[-1], transition.inSymbol)
-                    preBracketStateIndex.pop()
-                else:
-                    self.addTransitionToNew(stateIndex, stateCounter, "e")
-                    transition = self.transitions[
-                        next(iter(self.states[stateIndex].transitions))
-                    ]
-                    self.addTransitionTo(stateCounter, stateIndex, transition.inSymbol)
-
-                stateIndex = stateCounter
-                openBracket = False
-                closeBracket = False
+            # elif c == "+":
+            #     stateCounter += 1
+            #     if closeBracket:
+            #         self.addTransitionToNew(stateIndex, stateCounter, "ε")
+            #         transition = self.transitions[
+            #             next(iter(self.states[preBracketStateIndex[-1]].transitions))
+            #         ]
+            #         self.addTransitionTo(stateCounter, preBracketStateIndex[-1], transition.inSymbol)
+            #         preBracketStateIndex.pop()
+            #     else:
+            #         self.addTransitionToNew(stateIndex, stateCounter, "ε")
+            #         transition = self.transitions[
+            #             next(iter(self.states[stateIndex].transitions))
+            #         ]
+            #         self.addTransitionTo(stateCounter, stateIndex, transition.inSymbol)
+            #
+            #     stateIndex = stateCounter
+            #     openBracket = False
+            #     closeBracket = False
             elif c == "*":
                 stateCounter += 1
                 if closeBracket:
-                    self.addTransitionToNew(stateIndex, stateCounter, "e")
+                    self.addTransitionToNew(stateIndex, stateCounter, "ε")
                     transition = self.transitions[
                         next(iter(self.states[preBracketStateIndex[-1]].transitions))
                     ]
                     self.addTransitionTo(stateIndex, preBracketStateIndex[-1], transition.inSymbol)
-                    self.addTransitionTo(transition.fromState, stateCounter, "e")
+                    self.addTransitionTo(transition.fromState, stateCounter, "ε")
                     preBracketStateIndex.pop()
                 else:
-                    self.addTransitionToNew(stateIndex, stateCounter, "e")
+                    self.addTransitionToNew(stateIndex, stateCounter, "ε")
                     transition = self.transitions[
                         next(iter(self.states[stateIndex].transitions))
                     ]
                     self.addTransitionTo(stateCounter, stateIndex, transition.inSymbol)
-                    self.addTransitionTo(transition.fromState, stateCounter, "e")
+                    self.addTransitionTo(transition.fromState, stateCounter, "ε")
 
                 stateIndex = stateCounter
                 openBracket = False
@@ -199,7 +199,7 @@ class RegexToNFA:
 
         if stateIndexToBrackets and stateIndexToBrackets[-1]:
             for stateInd in stateIndexToBrackets[-1]:
-                self.addTransitionTo(stateInd, stateCounter, "e")
+                self.addTransitionTo(stateInd, stateCounter, "ε")
 
 
 if __name__ == "__main__":
