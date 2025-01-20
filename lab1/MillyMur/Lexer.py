@@ -1,111 +1,97 @@
 from __future__ import annotations
+
 from typing import Callable, List
 from Tokens import Token, TokenProcessResult
+from TokensType import SEPARATOR
 
 
 class LexerToken:
-    def __init__(self, tokenType: str, value: str, position: tuple[int, int]):
-        self.type = tokenType
+    def __init__(self, lexerType: str, value: str, pos: (int, int)):
+        self.type = lexerType
         self.value = value
-        self.position = position
+        self.pos = pos
 
     def __repr__(self):
-        return f"{self.type}('{self.value}') at {self.position}"
+        return f'{self.type} {self.pos} "{self.value}"'
 
 
 class Lexer:
     def __init__(self, tokens: List[Token], valueGetter: Callable[[], str]):
+        self.valueGetter = valueGetter
         self.tokens = tokens
+        self.buffer = valueGetter()
         self.line = 1
         self.column = 1
-        self.buffer = valueGetter()
-        self.valueGetter = valueGetter
-        self.statistics = dict()
 
     def nextToken(self) -> LexerToken | None:
-        if not self.buffer and not self.appendNewBuffer():
+        if len(self.buffer) == 0 and not self.appendNewBufferValue():
             return None
 
-        for token in self.tokens:
-            token.reset()
 
-            bufferIndex = 0
-            resultValue = ""
+        needContinie = True
+        while needContinie:
+            needContinie = False
+            for token in self.tokens:
+                token.reset()
 
-            while True:
-                charResult = token.nextChar(self.buffer[bufferIndex])
+                bufferIndex = 0
+                tmpResult = ""
 
-                if charResult == TokenProcessResult.SUCCESS:
-                    resultValue += self.buffer[bufferIndex]
-                    bufferIndex += 1
+                while True:
+                    charResult = token.nextChar(self.buffer[bufferIndex])
+                    if charResult == TokenProcessResult.SUCCESS:
+                        tmpResult += self.buffer[bufferIndex]
+                        bufferIndex += 1
+                    if charResult == TokenProcessResult.END or (charResult == TokenProcessResult.SUCCESS and token.isEnd() and bufferIndex == len(self.buffer) and not self.appendNewBufferValue()):
+                        self.buffer = self.buffer[bufferIndex:]
+                        self.column += len(tmpResult)
 
-                if charResult == TokenProcessResult.END or (
-                    charResult == TokenProcessResult.SUCCESS
-                    and token.isEnd()
-                    and bufferIndex == len(self.buffer)
-                    and not self.appendNewBuffer()
-                ):
-                    self.buffer = self.buffer[bufferIndex:]
-                    startPosition = (self.line, self.column)
-                    self.column += len(resultValue)
+                        if tmpResult == "\n":
+                            self.column = 1
+                            self.line += tmpResult.count("\n")
 
-                    if resultValue == "\n":
+                        column = self.column
+                        line = self.line
+
+                        if token.isCorrectLexema(tmpResult, True):
+                            self.setIsLastBeSeparate(token.isSeparate)
+                            return LexerToken(token.id, tmpResult, (line, column))
+                        bad = self.getBad(line, column, tmpResult)
+                        self.buffer = self.buffer[len(bad.value) - len(tmpResult):]
+                        return bad
+                    if charResult == TokenProcessResult.MISS:
+                        self.buffer = self.buffer[bufferIndex:]
                         self.column = 1
-                        self.line += 1
+                        self.line += tmpResult.count("\n")
 
-                    if token.id == 'BLOCK_COMMENT' or token.id == 'LINE_COMMENT':
-                        token.reset()
+                        self.setIsLastBeSeparate(token.isSeparate)
+
                         bufferIndex = 0
-                        continue
+                        self.column += len(tmpResult)
+                        needContinie = True
+                        break
+                    if charResult == TokenProcessResult.FAILED:
+                        break
+                    if bufferIndex == len(self.buffer) and not self.appendNewBufferValue():
+                        break
 
-                    lexerToken = LexerToken(token.id, resultValue, startPosition)
-                    self.appendIntoStatistics(lexerToken)
+        self.buffer = ""
+        return self.getBad(self.line, self.column)
 
-                    return lexerToken
-
-                if charResult == TokenProcessResult.FAILED:
-                    break
-
-                if bufferIndex == len(self.buffer) and not self.appendNewBuffer():
-                    break
-
-        tmp = self.buffer
-        self.buffer = self.buffer[1:]
-        return LexerToken("BAD", tmp[0], (self.line, self.column))
-
-    def appendIntoStatistics(self, lexerToken: LexerToken):
-        if lexerToken.value not in self.statistics.keys():
-            l = []
-            l.append(lexerToken)
-            self.statistics[lexerToken.value] = l
-        else:
-            self.statistics[lexerToken.value].append(lexerToken)
-
-    def printStatistics(self):
-        print()
-        print("STATISTICS")
-
-        print("VALUE".ljust(30) + "TYPE".ljust(15) + "COUNT".ljust(15) + "POSITIONS")
-        print("-" * 75)
-
-        for resultValue, lexerTokens in self.statistics.items():
-            value = (resultValue if resultValue else "<EMPTY>").ljust(30)
-            token_type = lexerTokens[0].type.ljust(15)
-            count = str(len(lexerTokens)).ljust(15)
-            positions = []
-
-            for lexerToken in lexerTokens:
-                position_str = ",".join(map(str, lexerToken.position))
-                positions.append(position_str)
-
-            print(f"{value}{token_type}{count}{'; '.join(positions)}")
-
-    def appendNewBuffer(self) -> bool:
-        newData = self.valueGetter()
-
-        if not newData:
+    def appendNewBufferValue(self) -> bool:
+        data = self.valueGetter()
+        if len(data) == 0:
             return False
-
-        self.buffer += newData
-
+        self.buffer += data
         return True
+
+    def getBad(self, line: int, column: int, lexem = None) -> LexerToken:
+        tmp = self.buffer
+        for sep in SEPARATOR:
+            tmp = tmp.replace(sep, " ")
+        if lexem is None:
+            return LexerToken("BAD", tmp.split(" ")[0], (self.line, self.column))
+        return LexerToken("BAD", lexem + tmp.split(" ")[0], (line, column - len(lexem) -1))
+
+    def setIsLastBeSeparate(self, v: bool):
+        self.isLastBeSeparate = v

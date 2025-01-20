@@ -25,16 +25,15 @@ class Slider:
             self.outputString += input_value
         else:
             raise ValueError()
-
     def IsFinal(self) -> bool:
         return len(self.currentState.transitions) == 0 and self.IsPossibleFinish()
 
     def IsPossibleFinish(self) -> bool:
         return self.currentState.name in self.finishStates
 
+    def GetOutputString(self) -> str:
+        return self.outputString
+
     def Reset(self) -> None:
         self.currentState = self.initialState
         self.outputString = ""
-
-    def GetOutputString(self) -> str:
-        return self.outputString
