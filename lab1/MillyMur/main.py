@@ -2,8 +2,10 @@ import Lexer
 import TokensType
 from typing import TextIO, Callable
 
+
 def getDataGetter(f: TextIO) ->Callable[[], str]:
     return lambda: f.readline()
+
 
 if __name__ == "__main__":
     import sys
@@ -24,7 +26,6 @@ if __name__ == "__main__":
         while (token := lexer.nextToken()) is not None:
             if token.type == "SPACE":
                 continue
-            if token.value != "":
-                print(token)
+            print(token)
             if token.type == "BAD":
                 pass
