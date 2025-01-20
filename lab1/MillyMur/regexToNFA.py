@@ -141,25 +141,25 @@ class RegexToNFA:
                     stateIndex = stateCounter
                     closeBracket = True
                 openBracket = False
-            # elif c == "+":
-            #     stateCounter += 1
-            #     if closeBracket:
-            #         self.addTransitionToNew(stateIndex, stateCounter, "ε")
-            #         transition = self.transitions[
-            #             next(iter(self.states[preBracketStateIndex[-1]].transitions))
-            #         ]
-            #         self.addTransitionTo(stateCounter, preBracketStateIndex[-1], transition.inSymbol)
-            #         preBracketStateIndex.pop()
-            #     else:
-            #         self.addTransitionToNew(stateIndex, stateCounter, "ε")
-            #         transition = self.transitions[
-            #             next(iter(self.states[stateIndex].transitions))
-            #         ]
-            #         self.addTransitionTo(stateCounter, stateIndex, transition.inSymbol)
-            #
-            #     stateIndex = stateCounter
-            #     openBracket = False
-            #     closeBracket = False
+            elif c == "+":
+                stateCounter += 1
+                if closeBracket:
+                    self.addTransitionToNew(stateIndex, stateCounter, "ε")
+                    transition = self.transitions[
+                        next(iter(self.states[preBracketStateIndex[-1]].transitions))
+                    ]
+                    self.addTransitionTo(stateCounter, preBracketStateIndex[-1], transition.inSymbol)
+                    preBracketStateIndex.pop()
+                else:
+                    self.addTransitionToNew(stateIndex, stateCounter, "ε")
+                    transition = self.transitions[
+                        next(iter(self.states[stateIndex].transitions))
+                    ]
+                    self.addTransitionTo(stateCounter, stateIndex, transition.inSymbol)
+
+                stateIndex = stateCounter
+                openBracket = False
+                closeBracket = False
             elif c == "*":
                 stateCounter += 1
                 if closeBracket:
